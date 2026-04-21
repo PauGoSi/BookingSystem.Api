@@ -82,3 +82,12 @@ otherwise the project may fail at build or runtime.
 ```bash
 git clone https://github.com/YOUR-USERNAME/BookingSystem.Api.git
 cd BookingSystem.Api
+```
+
+## API Documentation
+Swagger UI is available when running the application.
+
+Typically:
+https://localhost:7223/swagger
+
+Note: The port may vary depending on your local setup.
