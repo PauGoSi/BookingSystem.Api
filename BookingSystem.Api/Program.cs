@@ -22,6 +22,11 @@ namespace BookingSystem.Api
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
+
+                app.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/openapi/v1.json", "BookingSystem.Api v1");
+                });
             }
 
             app.UseHttpsRedirection();
