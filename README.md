@@ -1,4 +1,4 @@
-# 📅 BookingSystem API
+# BookingSystem API
 
 A RESTful API built with ASP.NET Core for managing bookings, users, roles, and resources.
 
@@ -6,7 +6,7 @@ This project focuses on clean structure, the DTO pattern, and relational databas
 
 ---
 
-## 🚀 Features
+## Features
 
 - Partial CRUD for:
   - Bookings
@@ -19,7 +19,7 @@ This project focuses on clean structure, the DTO pattern, and relational databas
 
 ---
 
-## 🧱 Tech Stack
+## Tech Stack
 
 - ASP.NET Core Web API
 - Entity Framework Core **10.0.0**
@@ -29,25 +29,25 @@ This project focuses on clean structure, the DTO pattern, and relational databas
 
 ---
 
-## ⚠️ Important (Versioning)
+## Important (Versioning)
 
 This project requires:
 
 - .NET SDK (compatible with the project)
 - Entity Framework Core **10.0.0**
 
-👉 All EF Core packages must use the **same version**,  
+All EF Core packages must use the **same version**,  
 otherwise the project may fail at build or runtime.
 
 ---
 
-## 📊 ER Diagram
+## ER Diagram
 
 ![ER Diagram](docs/er-diagram.png)
 
 ---
 
-## 🔗 Data Model
+## Data Model
 
 - A **User** has one **Role**
 - A **Booking** belongs to one **User**
@@ -55,7 +55,7 @@ otherwise the project may fail at build or runtime.
 
 ---
 
-## 📦 API Endpoints
+## API Endpoints
 
 ### Bookings
 - `GET /api/bookings`
@@ -75,13 +75,12 @@ otherwise the project may fail at build or runtime.
 
 ---
 
-## ▶️ Getting Started
+## Getting Started
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/BookingSystem.Api.git
-cd BookingSystem.Api
+git clone https://github.com/PauGoSi/BookingSystem.Api
 ```
 
 ## API Documentation
