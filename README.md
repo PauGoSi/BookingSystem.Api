@@ -74,7 +74,60 @@ otherwise the project may fail at build or runtime.
 - `POST /api/resources`
 
 ---
+## Booking Business Rules & Validation
 
+The Booking API enforces a set of validation rules to ensure data integrity and prevent invalid or conflicting bookings.
+
+### Business Rules
+
+When creating a booking (`POST /api/bookings`), the following rules apply:
+
+1. **Valid Time Range**
+   - `StartTime` must be earlier than `EndTime`
+   - Returns `400 Bad Request` if invalid
+
+2. **User Must Exist**
+   - The provided `UserId` must exist in the system
+   - Returns `404 Not Found` if user does not exist
+
+3. **Resource Must Exist**
+   - The provided `ResourceId` must exist
+   - Returns `404 Not Found` if resource does not exist
+
+4. **Resource Must Be Active**
+   - The resource must have `IsActive = true`
+   - Returns `400 Bad Request` if inactive
+
+5. **No Overlapping Bookings**
+   - A resource cannot be double-booked within overlapping time ranges
+   - Returns `409 Conflict` if overlap is detected
+
+6. **Successful Booking**
+   - If all validations pass, the booking is created successfully
+   - Returns `201 Created` with the created booking
+
+---
+
+### Example Error Response
+
+```json
+{
+  "error": "Resource is already booked in this time range."
+}
+```
+
+### This project follows a layered architecture:
+
+ - Controllers: Handle HTTP requests
+ - Services: Contain business logic and validation rules
+ - DTOs: Define API input/output models
+ - Data (DbContext): Handles database access via Entity Framework Core
+
+Business logic is isolated in the service layer to ensure:
+ - Clean controllers
+ - Reusable logic
+ - Easier testing and maintenance
+ 
 ## Getting Started
 
 ### 1. Clone the repository

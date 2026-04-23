@@ -45,10 +45,15 @@ namespace BookingSystem.Api.Controllers
         {
             var result = await _bookingService.CreateBookingAsync(dto);
 
+            if (!result.Success)
+            {
+                return StatusCode(result.StatusCode, new { error = result.Error });
+            }
+
             return CreatedAtAction(
                 nameof(GetBookingById),
-                new { id = result.Id },
-                result
+                new { id = result.Data!.Id },
+                result.Data
             );
         }
     }

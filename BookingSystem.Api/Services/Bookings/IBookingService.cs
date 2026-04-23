@@ -10,7 +10,7 @@ namespace BookingSystem.Api.Services.Bookings
         // Retrieves a single booking by id
         Task<BookingDto?> GetBookingByIdAsync(int id);
 
-        // Creates a new booking
-        Task<BookingDto> CreateBookingAsync(CreateBookingDto dto);
+        // Creates a new booking with validation result
+        Task<(bool Success, string? Error, int StatusCode, BookingDto? Data)> CreateBookingAsync(CreateBookingDto dto);
     }
 }
