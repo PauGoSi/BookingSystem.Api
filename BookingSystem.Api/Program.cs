@@ -1,5 +1,6 @@
 using BookingSystem.Api.Data;
 using Microsoft.EntityFrameworkCore;
+using BookingSystem.Api.Services.Bookings;
 
 namespace BookingSystem.Api
 {
@@ -13,6 +14,9 @@ namespace BookingSystem.Api
             // Add services to the container.
 
             builder.Services.AddControllers();
+
+            builder.Services.AddScoped<IBookingService, BookingService>();
+
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 

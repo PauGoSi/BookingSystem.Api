@@ -1,8 +1,6 @@
-using BookingSystem.Api.Data;
 using BookingSystem.Api.DTOs.Booking;
-using BookingSystem.Api.Models;
+using BookingSystem.Api.Services.Bookings;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookingSystem.Api.Controllers
 {
@@ -10,59 +8,48 @@ namespace BookingSystem.Api.Controllers
     [Route("api/[controller]")]
     public class BookingsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        // Service for handling booking business logic
+        private readonly IBookingService _bookingService;
 
-        public BookingsController(AppDbContext context)
+        // Injects booking service into controller
+        public BookingsController(IBookingService bookingService)
         {
-            _context = context;
+            _bookingService = bookingService;
         }
 
+        // Retrieves all bookings
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookings()
         {
-            var bookings = await _context.Bookings
-                .Select(b => new BookingDto
-                {
-                    Id = b.Id,
-                    UserId = b.UserId,
-                    ResourceId = b.ResourceId,
-                    StartTime = b.StartTime,
-                    EndTime = b.EndTime,
-                    Notes = b.Notes
-                })
-                .ToListAsync();
-
+            var bookings = await _bookingService.GetBookingsAsync();
             return Ok(bookings);
         }
 
+        // Retrieves a single booking by id
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<BookingDto>> GetBookingById([FromRoute] int id)
+        {
+            var booking = await _bookingService.GetBookingByIdAsync(id);
+
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(booking);
+        }
+
+        // Creates a new booking
         [HttpPost]
         public async Task<ActionResult<BookingDto>> CreateBooking(CreateBookingDto dto)
         {
-            var booking = new Booking
-            {
-                UserId = dto.UserId,
-                ResourceId = dto.ResourceId,
-                StartTime = dto.StartTime,
-                EndTime = dto.EndTime,
-                Status = "Active",
-                Notes = dto.Notes,
-                CreatedAt = DateTime.UtcNow
-            };
+            var result = await _bookingService.CreateBookingAsync(dto);
 
-            _context.Bookings.Add(booking);
-            await _context.SaveChangesAsync();
-
-            var result = new BookingDto
-            {
-                Id = booking.Id,
-                UserId = booking.UserId,
-                ResourceId = booking.ResourceId,
-                StartTime = booking.StartTime,
-                EndTime = booking.EndTime,
-                Notes = booking.Notes
-            };
-
-            return CreatedAtAction(nameof(GetBookings), new { id = result.Id }, result);
+            return CreatedAtAction(
+                nameof(GetBookingById),
+                new { id = result.Id },
+                result
+            );
         }
     }
 }
