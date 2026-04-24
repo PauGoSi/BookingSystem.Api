@@ -15,5 +15,8 @@ namespace BookingSystem.Api.Services.Bookings
 
         // Updates an existing booking
         Task<(bool Success, string? Error, int StatusCode)> UpdateBookingAsync(int id, UpdateBookingDto dto);
+
+        // Deletes a booking by id
+        Task<(bool Success, string? Error, int StatusCode)> DeleteBookingAsync(int id);
     }
 }

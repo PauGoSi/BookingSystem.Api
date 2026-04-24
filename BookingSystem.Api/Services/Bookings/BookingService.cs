@@ -174,5 +174,21 @@ namespace BookingSystem.Api.Services.Bookings
 
             return (true, null, 204);
         }
+
+        // Deletes a booking by id
+        public async Task<(bool Success, string? Error, int StatusCode)> DeleteBookingAsync(int id)
+        {
+            var booking = await _context.Bookings.FindAsync(id);
+
+            if (booking == null)
+            {
+                return (false, "Booking not found.", 404);
+            }
+
+            _context.Bookings.Remove(booking);
+            await _context.SaveChangesAsync();
+
+            return (true, null, 204);
+        }
     }
 }

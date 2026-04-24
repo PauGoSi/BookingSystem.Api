@@ -61,6 +61,7 @@ otherwise the project may fail at build or runtime.
 - `GET /api/bookings`
 - `POST /api/bookings`
 - `PUT /api/bookings`
+- `DELETE /api/bookings`
 
 ### Users
 - `GET /api/users`

@@ -70,5 +70,19 @@ namespace BookingSystem.Api.Controllers
 
             return NoContent();
         }
+
+        // Deletes a booking
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteBooking(int id)
+        {
+            var result = await _bookingService.DeleteBookingAsync(id);
+
+            if (!result.Success)
+            {
+                return StatusCode(result.StatusCode, new { error = result.Error });
+            }
+
+            return NoContent();
+        }
     }
 }
