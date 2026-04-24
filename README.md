@@ -130,12 +130,12 @@ The following rules apply:
    - Returns `409 Conflict` if overlap is detected
 
 10. **The requested resource to be booked must be Active**
-   - The resource must have `IsActive = true`
-   - Returns `400 Bad Request` if inactive
+    - The resource must have `IsActive = true`
+    - Returns `400 Bad Request` if inactive
 
 11. **The requested role name to be created should not already be in use**
-   - A newly created role should have an unique name
-   - Returns `409 Conflict` if a role name already exists in the system
+    - A newly created role should have an unique name
+    - Returns `409 Conflict` if a role name already exists in the system
 
 ---
 
@@ -153,6 +153,8 @@ The following rules apply:
    - If validation 5. pass, the existing booking is deleted successfully
    - Returns `204 No Content`
 
+---
+
 **Successful Resource**
 
    For creating a resource (`POST /api/resources`):
@@ -167,6 +169,8 @@ The following rules apply:
    - If validation 4. and 8. pass, the existing resource is deleted successfully
    - Returns `204 No Content`
 
+---
+
 **Successful User**
 
    For creating a user (`POST /api/users`):
@@ -180,6 +184,8 @@ The following rules apply:
    For deleting an existing user (`DELETE /api/users`):
    - If validation 3. and 7. pass, the existing user is deleted successfully
    - Returns `204 No Content`
+
+---
 
 **Successful Role**
 
