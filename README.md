@@ -85,7 +85,7 @@ The Booking API enforces a set of validation rules to ensure data integrity and 
 
 ### Business Rules
 
-When creating a booking (`POST /api/bookings`) or updating a booking (`PUT /api/bookings`), the following rules apply:
+The following rules may apply:
 
 1. **Valid Time Range**
    - `StartTime` must be earlier than `EndTime`
@@ -96,7 +96,7 @@ When creating a booking (`POST /api/bookings`) or updating a booking (`PUT /api/
    - Returns `404 Not Found` if user does not exist
 
 3. **Resource Must Exist**
-   - The provided `ResourceId` must exist
+   - The provided `ResourceId` must exist in the system
    - Returns `404 Not Found` if resource does not exist
 
 4. **Resource Must Be Active**
@@ -107,17 +107,42 @@ When creating a booking (`POST /api/bookings`) or updating a booking (`PUT /api/
    - A resource cannot be double-booked within overlapping time ranges
    - Returns `409 Conflict` if overlap is detected
 
-6. **Successful Booking**
+6. **Booking Must Exist**
+   - The provided `BookingId` must exist
+   - Returns `404 Not Found` if booking does not exist
 
-   For creating:
+7. **Resource has no bookings**
+   - The provided `ResourceId` does not have any bookings
+   - Returns `409 Conflict` if booking is detected
+
+**Successful Booking**
+
+   For creating a booking (`POST /api/bookings`):
    - If all validations (1.-5.) pass, the booking is created successfully
    - Returns `201 Created` with the created booking
 
-   For updating:
-   - If all validations (1.-5.) pass, the booking is updated successfully
+   For updating an existing booking (`PUT /api/bookings`):
+   - If all validations (1.-5.) pass, the existing booking is updated successfully
+   - Returns `204 No Content`
+
+   For deleting an existing booking (`DELETE /api/bookings`):
+   - If validation 6. pass, the existing booking is deleted successfully
+   - Returns `204 No Content`
+
+**Successful Resource**
+
+   For creating a resource (`POST /api/resources`):
+   - No validations need to be passed, and the resource will be created successfully
+   - Returns `201 Created` with the created resource
+
+   For updating an existing resource (`PUT /api/resources`):
+   - If validation 3. pass, the existing resource is updated successfully
+   - Returns `204 No Content`
+
+   For deleting an existing resource (`DELETE /api/resources`):
+   - If validation 3. and 7. pass, the existing resource is deleted successfully
    - Returns `204 No Content`
 ---
-
 ### Example Error Response
 
 ```json
@@ -125,6 +150,7 @@ When creating a booking (`POST /api/bookings`) or updating a booking (`PUT /api/
   "error": "Resource is already booked in this time range."
 }
 ```
+
 
 ### This project follows a layered architecture:
 

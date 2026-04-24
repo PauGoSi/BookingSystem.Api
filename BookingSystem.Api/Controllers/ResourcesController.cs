@@ -1,8 +1,6 @@
-﻿using BookingSystem.Api.Data;
-using BookingSystem.Api.DTOs.Resource;
-using BookingSystem.Api.Models;
+﻿using BookingSystem.Api.DTOs.Resource;
+using BookingSystem.Api.Services.Resources;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookingSystem.Api.Controllers
 {
@@ -10,58 +8,75 @@ namespace BookingSystem.Api.Controllers
     [Route("api/[controller]")]
     public class ResourcesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IResourceService _resourceService;
 
-        public ResourcesController(AppDbContext context)
+        // Injects resource service into controller
+        public ResourcesController(IResourceService resourceService)
         {
-            _context = context;
+            _resourceService = resourceService;
         }
 
+        // Retrieves all resources
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ResourceDto>>> GetResources()
         {
-            var resources = await _context.Resources
-                .Select(r => new ResourceDto
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Description = r.Description,
-                    Location = r.Location,
-                    Capacity = r.Capacity,
-                    IsActive = r.IsActive
-                })
-                .ToListAsync();
-
+            var resources = await _resourceService.GetResourcesAsync();
             return Ok(resources);
         }
 
+        // Retrieves a single resource by id
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<ResourceDto>> GetResourceById([FromRoute] int id)
+        {
+            var resource = await _resourceService.GetResourceByIdAsync(id);
+
+            if (resource == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(resource);
+        }
+
+        // Creates a new resource
         [HttpPost]
         public async Task<ActionResult<ResourceDto>> CreateResource(CreateResourceDto dto)
         {
-            var resource = new Resource
+            var result = await _resourceService.CreateResourceAsync(dto);
+
+            return CreatedAtAction(
+                nameof(GetResourceById),
+                new { id = result.Id },
+                result
+            );
+        }
+
+        // Updates an existing resource
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateResource([FromRoute] int id, UpdateResourceDto dto)
+        {
+            var result = await _resourceService.UpdateResourceAsync(id, dto);
+
+            if (!result.Success)
             {
-                Name = dto.Name,
-                Description = dto.Description,
-                Location = dto.Location,
-                Capacity = dto.Capacity,
-                IsActive = dto.IsActive,
-                CreatedAt = DateTime.UtcNow
-            };
+                return StatusCode(result.StatusCode, new { error = result.Error });
+            }
 
-            _context.Resources.Add(resource);
-            await _context.SaveChangesAsync();
+            return NoContent();
+        }
 
-            var result = new ResourceDto
+        // Deletes a resource
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteResource([FromRoute] int id)
+        {
+            var result = await _resourceService.DeleteResourceAsync(id);
+
+            if (!result.Success)
             {
-                Id = resource.Id,
-                Name = resource.Name,
-                Description = resource.Description,
-                Location = resource.Location,
-                Capacity = resource.Capacity,
-                IsActive = resource.IsActive
-            };
+                return StatusCode(result.StatusCode, new { error = result.Error });
+            }
 
-            return CreatedAtAction(nameof(GetResources), new { id = result.Id }, result);
+            return NoContent();
         }
     }
 }
