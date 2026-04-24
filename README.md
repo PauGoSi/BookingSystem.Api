@@ -120,11 +120,11 @@ The following rules may apply:
 **Successful Booking**
 
    For creating a booking (`POST /api/bookings`):
-   - If all validations (1.-5.) pass, the booking is created successfully
+   - If the validations (1.-5.) pass, the booking is created successfully
    - Returns `201 Created` with the created booking
 
    For updating an existing booking (`PUT /api/bookings`):
-   - If all validations (1.-5.) pass, the existing booking is updated successfully
+   - If the validations (1.-5.) pass, the existing booking is updated successfully
    - Returns `204 No Content`
 
    For deleting an existing booking (`DELETE /api/bookings`):
