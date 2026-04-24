@@ -75,6 +75,8 @@ dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.0
 ### Roles
 - `GET /api/roles`
 - `POST /api/roles`
+- `PUT /api/roles`
+- `DELETE /api/roles`
 
 ### Resources
 - `GET /api/resources`
