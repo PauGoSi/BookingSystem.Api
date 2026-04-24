@@ -77,6 +77,8 @@ dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.0
 ### Resources
 - `GET /api/resources`
 - `POST /api/resources`
+- `PUT /api/resources`
+- `DELETE /api/resources`
 
 ---
 ## Booking Business Rules & Validation
