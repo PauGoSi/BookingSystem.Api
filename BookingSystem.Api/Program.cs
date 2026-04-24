@@ -2,6 +2,7 @@ using BookingSystem.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using BookingSystem.Api.Services.Bookings;
 using BookingSystem.Api.Services.Resources;
+using BookingSystem.Api.Services.Users;
 using BookingSystem.Api.Middleware;
 
 namespace BookingSystem.Api
@@ -19,6 +20,7 @@ namespace BookingSystem.Api
 
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddScoped<IResourceService, ResourceService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();

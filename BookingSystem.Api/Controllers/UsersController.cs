@@ -1,8 +1,6 @@
-﻿using BookingSystem.Api.Data;
-using BookingSystem.Api.Models;
-using BookingSystem.Api.DTOs.User;
+﻿using BookingSystem.Api.DTOs.User;
+using BookingSystem.Api.Services.Users;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookingSystem.Api.Controllers
 {
@@ -10,58 +8,80 @@ namespace BookingSystem.Api.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUserService _userService;
 
-        public UsersController(AppDbContext context)
+        // Injects user service into controller
+        public UsersController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
-        // GET (return DTO)
+        // Retrieves all users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            var users = await _context.Users
-                .Select(u => new UserDto
-                {
-                    Id = u.Id,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
-                    Email = u.Email,
-                    RoleId = u.RoleId
-                })
-                .ToListAsync();
-
+            var users = await _userService.GetUsersAsync();
             return Ok(users);
         }
 
-        // POST (use DTO)
+        // Retrieves a single user by id
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<UserDto>> GetUserById([FromRoute] int id)
+        {
+            var user = await _userService.GetUserByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(user);
+        }
+
+        // Creates a new user
         [HttpPost]
         public async Task<ActionResult<UserDto>> CreateUser(CreateUserDto dto)
         {
-            var user = new User
+            var result = await _userService.CreateUserAsync(dto);
+
+            if (!result.Success)
             {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Email = dto.Email,
-                PasswordHash = dto.PasswordHash,
-                RoleId = dto.RoleId,
-                CreatedAt = DateTime.UtcNow
-            };
+                return StatusCode(result.StatusCode, new { error = result.Error });
+            }
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            return CreatedAtAction(
+                nameof(GetUserById),
+                new { id = result.Data!.Id },
+                result.Data
+            );
+        }
 
-            var result = new UserDto
+        // Updates an existing user
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateUser([FromRoute] int id, UpdateUserDto dto)
+        {
+            var result = await _userService.UpdateUserAsync(id, dto);
+
+            if (!result.Success)
             {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                RoleId = user.RoleId
-            };
+                return StatusCode(result.StatusCode, new { error = result.Error });
+            }
 
-            return CreatedAtAction(nameof(GetUsers), new { id = result.Id }, result);
+            return NoContent();
+        }
+
+        // Deletes a user
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteUser([FromRoute] int id)
+        {
+            var result = await _userService.DeleteUserAsync(id);
+
+            if (!result.Success)
+            {
+                return StatusCode(result.StatusCode, new { error = result.Error });
+            }
+
+            return NoContent();
         }
     }
 }
