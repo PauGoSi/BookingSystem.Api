@@ -111,32 +111,38 @@ The following rules apply:
    - The provided `BookingId` must exist in the system
    - Returns `404 Not Found` if booking does not exist
 
-6. **The requested user to be deleted has no bookings**
+6. **The requested role to be deleted has no users**
+   - The provided `RoleId` to be deleted does not have any users
+   - Returns `409 Conflict` if any users are detected
+
+7. **The requested user to be deleted has no bookings**
    - Provided `UserId` to be deleted does not have any bookings
    - Returns `409 Conflict` if booking is detected
 
-7. **The requested resource to be deleted has no bookings**
-   - The provided `ResourceId` does not have any bookings
+8. **The requested resource to be deleted has no bookings**
+   - The provided `ResourceId` to be deleted does not have any bookings
    - Returns `409 Conflict` if booking is detected
 
-8. **No Overlapping Bookings**
+9. **No Overlapping Bookings**
    - A resource cannot be double-booked within overlapping time ranges
    - Returns `409 Conflict` if overlap is detected
 
-9. **The requested resource to be booked must be Active**
+10. **The requested resource to be booked must be Active**
    - The resource must have `IsActive = true`
    - Returns `400 Bad Request` if inactive
 
-
+11. **The requested role name to be created should not already be in use**
+   - A newly created role should have an unique name
+   - Returns `409 Conflict` if a role name already exists in the system
 
 **Successful Booking**
 
    For creating a booking (`POST /api/bookings`):
-   - If the validations 1., 3., 4., 8., 9. pass, the booking is created successfully
+   - If the validations 1., 3., 4., 9., 10. pass, the booking is created successfully
    - Returns `201 Created` with the created booking
 
    For updating an existing booking (`PUT /api/bookings`):
-   - If the validations 1., 3., 4., 8., 9. pass, the existing booking is updated successfully
+   - If the validations 1., 3., 4., 9., 10. pass, the existing booking is updated successfully
    - Returns `204 No Content`
 
    For deleting an existing booking (`DELETE /api/bookings`):
@@ -154,21 +160,34 @@ The following rules apply:
    - Returns `204 No Content`
 
    For deleting an existing resource (`DELETE /api/resources`):
-   - If validation 4. and 7. pass, the existing resource is deleted successfully
+   - If validation 4. and 8. pass, the existing resource is deleted successfully
    - Returns `204 No Content`
 
 **Successful User**
 
    For creating a user (`POST /api/users`):
-   - If validation 2. pass, the existing user is created successfully
+   - If validation 2. pass, the user is created successfully
    - Returns `201 Created` with the created user
 
    For updating an existing user (`PUT /api/users`):
-   - If validation 3. pass, the existing resource is updated successfully
+   - If validation 3. pass, the existing user is updated successfully
    - Returns `204 No Content`
 
    For deleting an existing user (`DELETE /api/users`):
-   - If validation 3. and 6. pass, the existing user is deleted successfully
+   - If validation 3. and 7. pass, the existing user is deleted successfully
+   - Returns `204 No Content`
+
+**Successful Role**
+   For creating a role (`POST /api/roles`):
+   - If validation 11. pass, the role is created successfully
+   - Returns `201 Created` with the created role
+
+   For updating an existing role (`PUT /api/roles`):
+   - If validation 2. and 11. pass, the existing role is updated successfully
+   - Returns `204 No Content`
+
+   For deleting an existing role (`DELETE /api/roles`):
+   - If validation 2. and 6. pass, the existing role is deleted successfully
    - Returns `204 No Content`
 
 ---
@@ -179,7 +198,6 @@ The following rules apply:
   "error": "Resource is already booked in this time range."
 }
 ```
-
 
 ### This project follows a layered architecture:
 

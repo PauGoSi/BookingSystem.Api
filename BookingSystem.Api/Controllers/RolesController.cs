@@ -1,8 +1,6 @@
-﻿using BookingSystem.Api.Data;
-using BookingSystem.Api.DTOs.Role;
-using BookingSystem.Api.Models;
+﻿using BookingSystem.Api.DTOs.Role;
+using BookingSystem.Api.Services.Roles;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookingSystem.Api.Controllers
 {
@@ -10,45 +8,80 @@ namespace BookingSystem.Api.Controllers
     [Route("api/[controller]")]
     public class RolesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IRoleService _roleService;
 
-        public RolesController(AppDbContext context)
+        // Injects role service into controller
+        public RolesController(IRoleService roleService)
         {
-            _context = context;
+            _roleService = roleService;
         }
 
+        // Retrieves all roles
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RoleDto>>> GetRoles()
         {
-            var roles = await _context.Roles
-                .Select(r => new RoleDto
-                {
-                    Id = r.Id,
-                    Name = r.Name
-                })
-                .ToListAsync();
-
+            var roles = await _roleService.GetRolesAsync();
             return Ok(roles);
         }
 
+        // Retrieves a single role by id
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<RoleDto>> GetRoleById([FromRoute] int id)
+        {
+            var role = await _roleService.GetRoleByIdAsync(id);
+
+            if (role == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(role);
+        }
+
+        // Creates a new role
         [HttpPost]
         public async Task<ActionResult<RoleDto>> CreateRole(CreateRoleDto dto)
         {
-            var role = new Role
+            var result = await _roleService.CreateRoleAsync(dto);
+
+            if (!result.Success)
             {
-                Name = dto.Name
-            };
+                return StatusCode(result.StatusCode, new { error = result.Error });
+            }
 
-            _context.Roles.Add(role);
-            await _context.SaveChangesAsync();
+            return CreatedAtAction(
+                nameof(GetRoleById),
+                new { id = result.Data!.Id },
+                result.Data
+            );
+        }
 
-            var result = new RoleDto
+        // Updates an existing role
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateRole([FromRoute] int id, UpdateRoleDto dto)
+        {
+            var result = await _roleService.UpdateRoleAsync(id, dto);
+
+            if (!result.Success)
             {
-                Id = role.Id,
-                Name = role.Name
-            };
+                return StatusCode(result.StatusCode, new { error = result.Error });
+            }
 
-            return CreatedAtAction(nameof(GetRoles), new { id = result.Id }, result);
+            return NoContent();
+        }
+
+        // Deletes a role
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteRole([FromRoute] int id)
+        {
+            var result = await _roleService.DeleteRoleAsync(id);
+
+            if (!result.Success)
+            {
+                return StatusCode(result.StatusCode, new { error = result.Error });
+            }
+
+            return NoContent();
         }
     }
 }
