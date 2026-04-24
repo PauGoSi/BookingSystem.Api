@@ -1,6 +1,7 @@
 using BookingSystem.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using BookingSystem.Api.Services.Bookings;
+using BookingSystem.Api.Middleware;
 
 namespace BookingSystem.Api
 {
@@ -22,6 +23,7 @@ namespace BookingSystem.Api
 
             var app = builder.Build();
 
+            app.UseMiddleware<ErrorHandlingMiddleware>();
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
