@@ -180,6 +180,7 @@ The following rules apply:
    - Returns `204 No Content`
 
 **Successful Role**
+
    For creating a role (`POST /api/roles`):
    - If validation 11. pass, the role is created successfully
    - Returns `201 Created` with the created role
