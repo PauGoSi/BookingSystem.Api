@@ -12,5 +12,8 @@ namespace BookingSystem.Api.Services.Bookings
 
         // Creates a new booking with validation result
         Task<(bool Success, string? Error, int StatusCode, BookingDto? Data)> CreateBookingAsync(CreateBookingDto dto);
+
+        // Updates an existing booking
+        Task<(bool Success, string? Error, int StatusCode)> UpdateBookingAsync(int id, UpdateBookingDto dto);
     }
 }

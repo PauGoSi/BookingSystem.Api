@@ -114,5 +114,65 @@ namespace BookingSystem.Api.Services.Bookings
 
             return (true, null, 201, result);
         }
+
+        // Updates an existing booking with validation
+        public async Task<(bool Success, string? Error, int StatusCode)> UpdateBookingAsync(int id, UpdateBookingDto dto)
+        {
+            var booking = await _context.Bookings.FindAsync(id);
+
+            if (booking == null)
+            {
+                return (false, "Booking not found.", 404);
+            }
+
+            // Validate time
+            if (dto.StartTime >= dto.EndTime)
+            {
+                return (false, "StartTime must be before EndTime.", 400);
+            }
+
+            // Check user exists
+            var userExists = await _context.Users.AnyAsync(u => u.Id == dto.UserId);
+            if (!userExists)
+            {
+                return (false, "User not found.", 404);
+            }
+
+            // Check resource exists
+            var resource = await _context.Resources.FirstOrDefaultAsync(r => r.Id == dto.ResourceId);
+            if (resource == null)
+            {
+                return (false, "Resource not found.", 404);
+            }
+
+            // Check resource is active
+            if (!resource.IsActive)
+            {
+                return (false, "Resource is not active.", 400);
+            }
+
+            // Check overlapping bookings (exclude current booking)
+            var hasOverlap = await _context.Bookings.AnyAsync(b =>
+                b.Id != id &&
+                b.ResourceId == dto.ResourceId &&
+                dto.StartTime < b.EndTime &&
+                dto.EndTime > b.StartTime);
+
+            if (hasOverlap)
+            {
+                return (false, "Resource is already booked in this time range.", 409);
+            }
+
+            // Update fields
+            booking.UserId = dto.UserId;
+            booking.ResourceId = dto.ResourceId;
+            booking.StartTime = dto.StartTime;
+            booking.EndTime = dto.EndTime;
+            booking.Notes = dto.Notes;
+
+            await _context.SaveChangesAsync();
+
+            return (true, null, 204);
+        }
     }
 }

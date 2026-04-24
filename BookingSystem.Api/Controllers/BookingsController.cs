@@ -56,5 +56,19 @@ namespace BookingSystem.Api.Controllers
                 result.Data
             );
         }
+
+        // Updates an existing booking
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateBooking(int id, UpdateBookingDto dto)
+        {
+            var result = await _bookingService.UpdateBookingAsync(id, dto);
+
+            if (!result.Success)
+            {
+                return StatusCode(result.StatusCode, new { error = result.Error });
+            }
+
+            return NoContent();
+        }
     }
 }

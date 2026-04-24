@@ -60,6 +60,7 @@ otherwise the project may fail at build or runtime.
 ### Bookings
 - `GET /api/bookings`
 - `POST /api/bookings`
+- `PUT /api/bookings`
 
 ### Users
 - `GET /api/users`
@@ -80,7 +81,7 @@ The Booking API enforces a set of validation rules to ensure data integrity and 
 
 ### Business Rules
 
-When creating a booking (`POST /api/bookings`), the following rules apply:
+When creating a booking (`POST /api/bookings`) or updating a booking (`PUT /api/bookings`), the following rules apply:
 
 1. **Valid Time Range**
    - `StartTime` must be earlier than `EndTime`
@@ -103,9 +104,14 @@ When creating a booking (`POST /api/bookings`), the following rules apply:
    - Returns `409 Conflict` if overlap is detected
 
 6. **Successful Booking**
-   - If all validations pass, the booking is created successfully
+
+   For creating:
+   - If all validations (1.-5.) pass, the booking is created successfully
    - Returns `201 Created` with the created booking
 
+   For updating:
+   - If all validations (1.-5.) pass, the booking is updated successfully
+   - Returns `204 No Content`
 ---
 
 ### Example Error Response
