@@ -137,6 +137,8 @@ The following rules apply:
    - A newly created role should have an unique name
    - Returns `409 Conflict` if a role name already exists in the system
 
+---
+
 **Successful Booking**
 
    For creating a booking (`POST /api/bookings`):
@@ -194,6 +196,7 @@ The following rules apply:
    - Returns `204 No Content`
 
 ---
+
 ### Example Error Response
 
 ```json
@@ -202,6 +205,7 @@ The following rules apply:
 }
 ```
 
+---
 ### This project follows a layered architecture:
 
  - Controllers: Handle HTTP requests
