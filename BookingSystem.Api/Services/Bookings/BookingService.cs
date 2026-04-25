@@ -15,15 +15,36 @@ namespace BookingSystem.Api.Services.Bookings
             _context = context;
         }
 
-        // Retrieves all bookings as DTOs
-        // Retrieves paginated bookings as DTOs
+        // Retrieves filtered and paginated bookings as DTOs
         public async Task<IEnumerable<BookingDto>> GetBookingsAsync(BookingQueryDto query)
         {
             var page = query.Page < 1 ? 1 : query.Page;
             var pageSize = query.PageSize < 1 ? 10 : query.PageSize;
             pageSize = pageSize > 100 ? 100 : pageSize;
 
-            return await _context.Bookings
+            var bookingsQuery = _context.Bookings.AsQueryable();
+
+            if (query.UserId.HasValue)
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.UserId == query.UserId.Value);
+            }
+
+            if (query.ResourceId.HasValue)
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.ResourceId == query.ResourceId.Value);
+            }
+
+            if (query.FromDate.HasValue)
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.StartTime >= query.FromDate.Value);
+            }
+
+            if (query.ToDate.HasValue)
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.EndTime <= query.ToDate.Value);
+            }
+
+            return await bookingsQuery
                 .OrderBy(b => b.StartTime)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
