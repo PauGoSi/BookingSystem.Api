@@ -17,11 +17,11 @@ namespace BookingSystem.Api.Controllers
             _bookingService = bookingService;
         }
 
-        // Retrieves all bookings
+        // Retrieves paginated bookings
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookings()
+        public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookings([FromQuery] BookingQueryDto query)
         {
-            var bookings = await _bookingService.GetBookingsAsync();
+            var bookings = await _bookingService.GetBookingsAsync(query);
             return Ok(bookings);
         }
 

@@ -16,9 +16,17 @@ namespace BookingSystem.Api.Services.Bookings
         }
 
         // Retrieves all bookings as DTOs
-        public async Task<IEnumerable<BookingDto>> GetBookingsAsync()
+        // Retrieves paginated bookings as DTOs
+        public async Task<IEnumerable<BookingDto>> GetBookingsAsync(BookingQueryDto query)
         {
+            var page = query.Page < 1 ? 1 : query.Page;
+            var pageSize = query.PageSize < 1 ? 10 : query.PageSize;
+            pageSize = pageSize > 100 ? 100 : pageSize;
+
             return await _context.Bookings
+                .OrderBy(b => b.StartTime)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(b => new BookingDto
                 {
                     Id = b.Id,

@@ -5,7 +5,7 @@ namespace BookingSystem.Api.Services.Bookings
     public interface IBookingService
     {
         // Retrieves all bookings
-        Task<IEnumerable<BookingDto>> GetBookingsAsync();
+        Task<IEnumerable<BookingDto>> GetBookingsAsync(BookingQueryDto query);
 
         // Retrieves a single booking by id
         Task<BookingDto?> GetBookingByIdAsync(int id);
