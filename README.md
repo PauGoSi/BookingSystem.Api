@@ -33,14 +33,14 @@ This project focuses on clean structure, the DTO pattern, and relational databas
 This project requires:
 
 - .NET SDK (compatible with the project)
-- Entity Framework Core **10.0.0**
+- Entity Framework Core **10.0.7**
 
 All EF Core packages must use the **same version**,  
 otherwise the project may fail at build or runtime.
 ```PowerShell
-dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 10.0.0
-dotnet add package Microsoft.EntityFrameworkCore.Tools --version 10.0.0
-dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.0
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 10.0.7
+dotnet add package Microsoft.EntityFrameworkCore.Tools --version 10.0.7
+dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.7
 ```
 ---
 
