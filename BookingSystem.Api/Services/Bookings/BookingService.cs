@@ -57,6 +57,11 @@ namespace BookingSystem.Api.Services.Bookings
                 return (false, "StartTime must be before EndTime.", 400, null);
             }
 
+            if (dto.StartTime <= DateTime.UtcNow)
+            {
+                return (false, "StartTime must be in the future.", 400, null);
+            }
+
             // Checks that the user exists
             var userExists = await _context.Users.AnyAsync(u => u.Id == dto.UserId);
             if (!userExists)
@@ -129,6 +134,11 @@ namespace BookingSystem.Api.Services.Bookings
             if (dto.StartTime >= dto.EndTime)
             {
                 return (false, "StartTime must be before EndTime.", 400);
+            }
+
+            if (dto.StartTime <= DateTime.UtcNow)
+            {
+                return (false, "StartTime must be in the future.", 400);
             }
 
             // Check user exists
