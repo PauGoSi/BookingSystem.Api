@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BookingSystem.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/resources")]
     public class ResourcesController : ControllerBase
     {
         private readonly IResourceService _resourceService;

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BookingSystem.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/roles")]
     public class RolesController : ControllerBase
     {
         private readonly IRoleService _roleService;

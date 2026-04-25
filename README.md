@@ -62,25 +62,33 @@ dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.0
 
 ### Bookings
 - `GET /api/bookings`
+- `GET /api/bookings?page=1&pageSize=10`
+- `GET /api/bookings?resourceId=1`
+- `GET /api/bookings?userId=1`
+- `GET /api/bookings?fromDate=2026-05-01&toDate=2026-05-31`
 - `POST /api/bookings`
+- `GET /api/bookings/{id}`
 - `PUT /api/bookings`
 - `DELETE /api/bookings`
 
 ### Users
 - `GET /api/users`
 - `POST /api/users`
+- `GET /api/users/{id}`
 - `PUT /api/users`
 - `DELETE /api/users`
 
 ### Roles
 - `GET /api/roles`
 - `POST /api/roles`
+- `GET /api/roles/{id}`
 - `PUT /api/roles`
 - `DELETE /api/roles`
 
 ### Resources
 - `GET /api/resources`
 - `POST /api/resources`
+- `GET /api/resources/{id}`
 - `PUT /api/resources`
 - `DELETE /api/resources`
 

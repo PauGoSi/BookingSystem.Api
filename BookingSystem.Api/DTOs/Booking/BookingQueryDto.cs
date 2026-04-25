@@ -1,14 +1,22 @@
-﻿namespace BookingSystem.Api.DTOs.Booking
+﻿using Microsoft.AspNetCore.Mvc;
+
+public class BookingQueryDto
 {
-    public class BookingQueryDto
-    {
-        public int Page { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
+    [FromQuery(Name = "page")]
+    public int Page { get; set; } = 1;
 
-        public int? UserId { get; set; }
-        public int? ResourceId { get; set; }
+    [FromQuery(Name = "pageSize")]
+    public int PageSize { get; set; } = 10;
 
-        public DateTime? FromDate { get; set; }
-        public DateTime? ToDate { get; set; }
-    }
+    [FromQuery(Name = "userId")]
+    public int? UserId { get; set; }
+
+    [FromQuery(Name = "resourceId")]
+    public int? ResourceId { get; set; }
+
+    [FromQuery(Name = "fromDate")]
+    public DateTime? FromDate { get; set; }
+
+    [FromQuery(Name = "toDate")]
+    public DateTime? ToDate { get; set; }
 }

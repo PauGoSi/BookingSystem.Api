@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BookingSystem.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/bookings")]
     public class BookingsController : ControllerBase
     {
         // Service for handling booking business logic
