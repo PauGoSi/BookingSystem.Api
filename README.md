@@ -22,7 +22,7 @@ This project focuses on clean structure, the DTO pattern, and relational databas
 ## Tech Stack
 
 - ASP.NET Core Web API
-- Entity Framework Core **10.0.0**
+- Entity Framework Core **10.0.7**
 - Swagger / OpenAPI
 - C#
 
