@@ -166,7 +166,8 @@ The following rules apply:
 
 14. **A booking cannot be cancelled more than once**
     - The specified `BookingId` must not already have the status "Cancelled"
-    - Returns 400 Bad Request if the booking is already cancelled
+    - Returns `400 Bad Request` if the booking is already cancelled
+
 ---
 
 **Successful Booking**
