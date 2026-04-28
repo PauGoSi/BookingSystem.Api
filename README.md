@@ -1,8 +1,18 @@
 # BookingSystem API
 
-A RESTful API built with ASP.NET Core for managing bookings, users, roles, and resources.
+A RESTful backend system built with ASP.NET Core for managing bookings, users, roles, and resources.
 
-This project focuses on clean structure, the DTO pattern, and relational database design.
+## Purpose
+This project simulates a real-world booking system where users can reserve resources while ensuring data integrity and preventing conflicts.
+
+The goal was to design a clean, maintainable backend with clear separation of concerns and realistic business rules.
+
+## Key Features
+- Booking management with conflict detection (no overlapping bookings)
+- Relational data model (Users, Roles, Resources, Bookings)
+- Validation rules to ensure data integrity
+- Layered architecture (Controllers, Services, DTOs)
+- Pagination and filtering support
 
 ---
 
