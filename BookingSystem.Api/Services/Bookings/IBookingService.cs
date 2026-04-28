@@ -7,6 +7,9 @@ namespace BookingSystem.Api.Services.Bookings
         // Retrieves all bookings
         Task<IEnumerable<BookingDto>> GetBookingsAsync(BookingQueryDto query);
 
+        // PATCH /api/bookings/{id}/cancel
+        Task<(bool Success, string? Error, int StatusCode)> CancelBookingAsync(int id);
+
         // Retrieves a single booking by id
         Task<BookingDto?> GetBookingByIdAsync(int id);
 

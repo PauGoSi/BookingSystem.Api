@@ -77,6 +77,7 @@ dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.7
 - `GET /api/bookings?userId=1`
 - `GET /api/bookings?fromDate=2026-05-01&toDate=2026-05-31`
 - `POST /api/bookings`
+- `PATCH /api/bookings/{id}/cancel`
 - `GET /api/bookings/{id}`
 - `PUT /api/bookings`
 - `DELETE /api/bookings`

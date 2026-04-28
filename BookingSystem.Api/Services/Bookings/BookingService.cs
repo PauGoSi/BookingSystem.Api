@@ -2,6 +2,7 @@
 using BookingSystem.Api.DTOs.Booking;
 using BookingSystem.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using BookingSystem.Api.Enums;
 
 namespace BookingSystem.Api.Services.Bookings
 {
@@ -55,9 +56,32 @@ namespace BookingSystem.Api.Services.Bookings
                     ResourceId = b.ResourceId,
                     StartTime = b.StartTime,
                     EndTime = b.EndTime,
+                    Status = b.Status,
                     Notes = b.Notes
                 })
                 .ToListAsync();
+        }
+
+        // Cancels a booking
+        public async Task<(bool Success, string? Error, int StatusCode)> CancelBookingAsync(int id)
+        {
+            var booking = await _context.Bookings.FindAsync(id);
+
+            if (booking == null)
+            {
+                return (false, "Booking not found.", 404);
+            }
+
+            if (booking.Status == BookingStatus.Cancelled)
+            {
+                return (false, "Booking is already cancelled.", 400);
+            }
+
+            booking.Status = BookingStatus.Cancelled;
+
+            await _context.SaveChangesAsync();
+
+            return (true, null, 200);
         }
 
         // Retrieves a single booking by id
@@ -72,6 +96,7 @@ namespace BookingSystem.Api.Services.Bookings
                     ResourceId = b.ResourceId,
                     StartTime = b.StartTime,
                     EndTime = b.EndTime,
+                    Status = b.Status,
                     Notes = b.Notes
                 })
                 .FirstOrDefaultAsync();
@@ -128,7 +153,7 @@ namespace BookingSystem.Api.Services.Bookings
                 ResourceId = dto.ResourceId,
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime,
-                Status = "Active",
+                Status = BookingStatus.Active,
                 Notes = dto.Notes,
                 CreatedAt = DateTime.UtcNow
             };
@@ -143,6 +168,7 @@ namespace BookingSystem.Api.Services.Bookings
                 ResourceId = booking.ResourceId,
                 StartTime = booking.StartTime,
                 EndTime = booking.EndTime,
+                Status = booking.Status,
                 Notes = booking.Notes
             };
 

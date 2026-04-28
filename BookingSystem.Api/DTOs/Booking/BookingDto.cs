@@ -1,4 +1,6 @@
-﻿namespace BookingSystem.Api.DTOs.Booking
+﻿using BookingSystem.Api.Enums;
+
+namespace BookingSystem.Api.DTOs.Booking
 {
     public class BookingDto
     {
@@ -10,6 +12,7 @@
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
 
+        public BookingStatus Status { get; set; }
         public string? Notes { get; set; }
     }
 }

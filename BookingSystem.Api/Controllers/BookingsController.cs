@@ -25,6 +25,20 @@ namespace BookingSystem.Api.Controllers
             return Ok(bookings);
         }
 
+        // Cancels a booking
+        [HttpPatch("{id:int}/cancel")]
+        public async Task<IActionResult> CancelBooking(int id)
+        {
+            var result = await _bookingService.CancelBookingAsync(id);
+
+            if (!result.Success)
+            {
+                return StatusCode(result.StatusCode, new { error = result.Error });
+            }
+
+            return NoContent();
+        }
+
         // Retrieves a single booking by id
         [HttpGet("{id:int}")]
         public async Task<ActionResult<BookingDto>> GetBookingById([FromRoute] int id)

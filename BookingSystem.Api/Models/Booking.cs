@@ -1,4 +1,6 @@
-﻿namespace BookingSystem.Api.Models
+﻿using BookingSystem.Api.Enums;
+
+namespace BookingSystem.Api.Models
 {
     public class Booking
     {
@@ -10,7 +12,7 @@
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
 
-        public string Status { get; set; } = null!;
+        public BookingStatus Status { get; set; }
         public string? Notes { get; set; }
 
         public DateTime CreatedAt { get; set; }
