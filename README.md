@@ -79,29 +79,29 @@ dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.7
 - `POST /api/bookings`
 - `PATCH /api/bookings/{id}/cancel`
 - `GET /api/bookings/{id}`
-- `PUT /api/bookings`
-- `DELETE /api/bookings`
+- `PUT /api/bookings/{id}`
+- `DELETE /api/bookings/{id}`
 
 ### Users
 - `GET /api/users`
 - `POST /api/users`
 - `GET /api/users/{id}`
-- `PUT /api/users`
-- `DELETE /api/users`
+- `PUT /api/users/{id}`
+- `DELETE /api/users/{id}`
 
 ### Roles
 - `GET /api/roles`
 - `POST /api/roles`
 - `GET /api/roles/{id}`
-- `PUT /api/roles`
-- `DELETE /api/roles`
+- `PUT /api/roles/{id}`
+- `DELETE /api/roles/{id}`
 
 ### Resources
 - `GET /api/resources`
 - `POST /api/resources`
 - `GET /api/resources/{id}`
-- `PUT /api/resources`
-- `DELETE /api/resources`
+- `PUT /api/resources/{id}`
+- `DELETE /api/resources/{id}`
 
 ---
 ## Booking Business Rules & Validation
