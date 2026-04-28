@@ -164,6 +164,9 @@ The following rules apply:
     - A newly created role should have an unique name
     - Returns `409 Conflict` if a role name already exists in the system
 
+14. **A booking cannot be cancelled more than once**
+    - The specified `BookingId` must not already have the status "Cancelled"
+    - Returns 400 Bad Request if the booking is already cancelled
 ---
 
 **Successful Booking**
@@ -171,6 +174,10 @@ The following rules apply:
    For creating a booking (`POST /api/bookings`):
    - If the validations 1., 2., 4., 6., 11., 12. pass, the booking is created successfully
    - Returns `201 Created` with the created booking
+
+   For Cancelling a booking (`PATCH /api/bookings/{id}/cancel`):
+   - If the validations 7. and 14. pass, the booking is Cancelled successfully
+   - Returns `204 No Content`
 
    For updating an existing booking (`PUT /api/bookings`):
    - If the validations 1., 2., 4., 6., 11., 12. pass, the existing booking is updated successfully
