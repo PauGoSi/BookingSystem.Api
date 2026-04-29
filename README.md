@@ -78,6 +78,7 @@ dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.7
 - `GET /api/bookings?fromDate=2026-05-01&toDate=2026-05-31`
 - `POST /api/bookings`
 - `PATCH /api/bookings/{id}/cancel`
+- `PATCH /api/bookings/{id}/complete`
 - `GET /api/bookings/{id}`
 - `PUT /api/bookings/{id}`
 - `DELETE /api/bookings/{id}`
@@ -168,6 +169,22 @@ The following rules apply:
     - The specified `BookingId` must not already have the status "Cancelled"
     - Returns `400 Bad Request` if the booking is already cancelled
 
+15. **Completed bookings cannot be cancelled**
+    - The specified `BookingId` must not already have the status "Completed"
+    - Returns `400 Bad Request` if the booking is already completed
+
+16. **Cancelled bookings cannot be completed**
+    - The specified `BookingId` must not already have the status "Cancelled"
+    - Returns `400 Bad Request` if the booking is already cancelled
+
+17. **Booking cannot be completed before EndTime has passed**
+    - The specified `BookingId` can only be completed if EndTime is in the past
+    - Returns `400 Bad Request` if EndTime is not in the past
+
+18. **A booking cannot be completed more than once**
+    - The specified `BookingId` must not already have the status "completed"
+    - Returns `400 Bad Request` if the booking is already completed
+
 ---
 
 **Successful Booking**
@@ -177,7 +194,11 @@ The following rules apply:
    - Returns `201 Created` with the created booking
 
    For Cancelling a booking (`PATCH /api/bookings/{id}/cancel`):
-   - If the validations 7. and 14. pass, the booking is Cancelled successfully
+   - If the validations 7., 14. and 15. pass, the booking is cancelled successfully
+   - Returns `204 No Content`
+
+   For Completing a booking (`PATCH /api/bookings/{id}/complete`):
+   - If the validations 7., 16., 17. and 18. pass, the booking is completed successfully
    - Returns `204 No Content`
 
    For updating an existing booking (`PUT /api/bookings`):

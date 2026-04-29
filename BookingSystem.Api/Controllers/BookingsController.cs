@@ -39,6 +39,20 @@ namespace BookingSystem.Api.Controllers
             return NoContent();
         }
 
+        // Completes a booking
+        [HttpPatch("{id:int}/complete")]
+        public async Task<IActionResult> CompleteBooking([FromRoute] int id)
+        {
+            var result = await _bookingService.CompleteBookingAsync(id);
+
+            if (!result.Success)
+            {
+                return StatusCode(result.StatusCode, new { error = result.Error });
+            }
+
+            return NoContent();
+        }
+
         // Retrieves a single booking by id
         [HttpGet("{id:int}")]
         public async Task<ActionResult<BookingDto>> GetBookingById([FromRoute] int id)

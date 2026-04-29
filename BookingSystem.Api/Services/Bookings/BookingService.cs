@@ -93,11 +93,48 @@ namespace BookingSystem.Api.Services.Bookings
                 return (false, "Booking is already cancelled.", 400);
             }
 
+            if (booking.Status == BookingStatus.Completed)
+            {
+                return (false, "Completed bookings cannot be cancelled.", 400);
+            }
+
             booking.Status = BookingStatus.Cancelled;
 
             await _context.SaveChangesAsync();
 
             return (true, null, 200);
+        }
+
+        // Completes a booking
+        public async Task<(bool Success, string? Error, int StatusCode)> CompleteBookingAsync(int id)
+        {
+            var booking = await _context.Bookings.FindAsync(id);
+
+            if (booking == null)
+            {
+                return (false, "Booking not found.", 404);
+            }
+
+            if (booking.Status == BookingStatus.Cancelled)
+            {
+                return (false, "Cancelled bookings cannot be completed.", 400);
+            }
+
+            if (booking.Status == BookingStatus.Completed)
+            {
+                return (false, "Booking is already completed.", 400);
+            }
+
+            if (booking.EndTime > DateTime.UtcNow)
+            {
+                return (false, "Booking cannot be completed before EndTime has passed.", 400);
+            }
+
+            booking.Status = BookingStatus.Completed;
+
+            await _context.SaveChangesAsync();
+
+            return (true, null, 204);
         }
 
         // Retrieves a single booking by id

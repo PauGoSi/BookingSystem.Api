@@ -10,6 +10,9 @@ namespace BookingSystem.Api.Services.Bookings
         // PATCH /api/bookings/{id}/cancel
         Task<(bool Success, string? Error, int StatusCode)> CancelBookingAsync(int id);
 
+        // Completes a booking
+        Task<(bool Success, string? Error, int StatusCode)> CompleteBookingAsync(int id);
+
         // Retrieves a single booking by id
         Task<BookingDto?> GetBookingByIdAsync(int id);
 
