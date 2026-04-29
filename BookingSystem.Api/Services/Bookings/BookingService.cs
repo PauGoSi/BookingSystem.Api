@@ -16,6 +16,22 @@ namespace BookingSystem.Api.Services.Bookings
             _context = context;
         }
 
+        // Determines the current booking status based on time
+        private static BookingStatus GetCurrentStatus(Booking booking)
+        {
+            if (booking.Status == BookingStatus.Cancelled)
+            {
+                return BookingStatus.Cancelled;
+            }
+
+            if (booking.EndTime <= DateTime.UtcNow)
+            {
+                return BookingStatus.Completed;
+            }
+
+            return booking.Status;
+        }
+
         // Retrieves filtered and paginated bookings as DTOs
         public async Task<IEnumerable<BookingDto>> GetBookingsAsync(BookingQueryDto query)
         {
@@ -56,7 +72,7 @@ namespace BookingSystem.Api.Services.Bookings
                     ResourceId = b.ResourceId,
                     StartTime = b.StartTime,
                     EndTime = b.EndTime,
-                    Status = b.Status,
+                    Status = GetCurrentStatus(b),
                     Notes = b.Notes
                 })
                 .ToListAsync();
@@ -96,7 +112,7 @@ namespace BookingSystem.Api.Services.Bookings
                     ResourceId = b.ResourceId,
                     StartTime = b.StartTime,
                     EndTime = b.EndTime,
-                    Status = b.Status,
+                    Status = GetCurrentStatus(b),
                     Notes = b.Notes
                 })
                 .FirstOrDefaultAsync();
@@ -168,7 +184,7 @@ namespace BookingSystem.Api.Services.Bookings
                 ResourceId = booking.ResourceId,
                 StartTime = booking.StartTime,
                 EndTime = booking.EndTime,
-                Status = booking.Status,
+                Status = GetCurrentStatus(booking),
                 Notes = booking.Notes
             };
 

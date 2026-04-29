@@ -5,6 +5,9 @@ using BookingSystem.Api.Services.Resources;
 using BookingSystem.Api.Services.Users;
 using BookingSystem.Api.Services.Roles;
 using BookingSystem.Api.Middleware;
+using System.Text.Json.Serialization;
+
+
 
 namespace BookingSystem.Api
 {
@@ -17,7 +20,11 @@ namespace BookingSystem.Api
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddScoped<IResourceService, ResourceService>();
