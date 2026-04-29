@@ -7,6 +7,14 @@ This project simulates a real-world booking system where users can reserve resou
 
 The goal was to design a clean, maintainable backend with clear separation of concerns and realistic business rules.
 
+### Example Booking Flow
+```
+1. User creates a booking  
+2. System validates time and availability  
+3. Booking is stored with status `Active`  
+4. Background service automatically updates expired bookings to `Completed`  
+5. User or admin can cancel or complete bookings manually  
+```
 ## Key Features
 - Booking management with conflict detection (no overlapping bookings)
 - Relational data model (Users, Roles, Resources, Bookings)
@@ -268,18 +276,74 @@ The following rules apply:
 ```
 
 ---
-### This project follows a layered architecture:
 
- - Controllers: Handle HTTP requests
- - Services: Contain business logic and validation rules
- - DTOs: Define API input/output models
- - Data (DbContext): Handles database access via Entity Framework Core
+## Architecture
+
+This project follows a clean, layered architecture with a clear separation of concerns:
+
+### Core Layers
+
+- **Controllers**  
+  Handle HTTP requests and responses.  
+  Responsible only for routing, model binding, and returning appropriate HTTP status codes.
+
+- **Services**  
+  Contain all business logic and validation rules.  
+  Ensure that controllers remain thin and logic is reusable and testable.
+
+- **DTOs (Data Transfer Objects)**  
+  Define the structure of data exchanged between client and API.  
+  Prevent direct exposure of domain models.
+
+- **Data (DbContext)**  
+  Manages database access using Entity Framework Core.  
+  Responsible for persistence and querying.
+
+---
+
+### Supporting Layers
+
+- **Enums**  
+  Define strongly-typed domain values such as `BookingStatus`.  
+  Improve readability, maintainability, and prevent invalid states.
+
+- **Middleware**  
+  Handles cross-cutting concerns such as global error handling.  
+  Ensures consistent API responses and centralized exception management.
+
+- **BackgroundServices**  
+  Run system-level background processes independent of HTTP requests.  
+  Example: Automatically updating expired bookings to `Completed`.
+
+---
+
+### Design Principles
 
 Business logic is isolated in the service layer to ensure:
- - Clean controllers
- - Reusable logic
- - Easier testing and maintenance
- 
+
+- Clean and maintainable controllers  
+- Reusable domain logic  
+- Better separation of concerns  
+- Easier testing and scalability  
+
+---
+
+### Time Handling
+
+All timestamps are stored and processed in **UTC** (`DateTime.UtcNow`).
+
+This ensures:
+
+- Consistent behavior across different environments and time zones  
+- No issues with daylight saving time  
+- Reliable validation logic in the backend  
+
+All time-based business rules (e.g. preventing bookings in the past) are evaluated using UTC.
+
+Clients (e.g. frontend applications) are responsible for converting timestamps to the user's local time zone for display purposes. 
+
+---
+
 ## Getting Started
 
 ### 1. Clone the repository
@@ -287,11 +351,12 @@ Business logic is isolated in the service layer to ensure:
 ```bash
 git clone https://github.com/PauGoSi/BookingSystem.Api
 ```
-
 ## API Documentation
+
 Swagger UI is available when running the application.
 
 Typically:
+```bash
 https://localhost:7223/swagger
-
+```
 Note: The port may vary depending on your local setup.

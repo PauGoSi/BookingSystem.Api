@@ -6,7 +6,7 @@ using BookingSystem.Api.Services.Users;
 using BookingSystem.Api.Services.Roles;
 using BookingSystem.Api.Middleware;
 using System.Text.Json.Serialization;
-
+using BookingSystem.Api.BackgroundServices;
 
 
 namespace BookingSystem.Api
@@ -25,7 +25,7 @@ namespace BookingSystem.Api
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
-
+            builder.Services.AddHostedService<BookingStatusBackgroundService>();
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddScoped<IResourceService, ResourceService>();
             builder.Services.AddScoped<IUserService, UserService>();
