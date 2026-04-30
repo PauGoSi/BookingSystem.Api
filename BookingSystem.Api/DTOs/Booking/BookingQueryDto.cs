@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BookingSystem.Api.Enums;
+using Microsoft.AspNetCore.Mvc;
 
 public class BookingQueryDto
 {
@@ -19,4 +20,7 @@ public class BookingQueryDto
 
     [FromQuery(Name = "toDate")]
     public DateTime? ToDate { get; set; }
+
+    [FromQuery(Name = "status")]
+    public BookingStatus? Status { get; set; }
 }

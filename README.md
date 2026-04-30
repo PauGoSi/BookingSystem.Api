@@ -26,7 +26,7 @@ The goal was to design a clean, maintainable backend with clear separation of co
 
 ## Features
 
-- Partial CRUD for:
+- CRUD for:
   - Bookings
   - Users
   - Roles
@@ -84,6 +84,25 @@ dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.7
 - `GET /api/bookings?resourceId=1`
 - `GET /api/bookings?userId=1`
 - `GET /api/bookings?fromDate=2026-05-01&toDate=2026-05-31`
+
+Since `BookingStatus` is an enum
+
+```C#
+public enum BookingStatus
+{
+    Active = 1,
+    Cancelled = 2,
+    Completed = 3
+}
+```
+its API endpoint url supports both numeric and string representations of enum values. 
+
+- `GET /api/bookings?status=Active` or `GET /api/bookings?status=1`
+- `GET /api/bookings?status=Cancelled` or `GET /api/bookings?status=2`
+- `GET /api/bookings?status=Completed` or `GET /api/bookings?status=3`
+
+Using string values (e.g. `Completed`) is recommended for better readability and maintainability. Note that the Swagger UI only accepts integer for `status`.  
+
 - `POST /api/bookings`
 - `PATCH /api/bookings/{id}/cancel`
 - `PATCH /api/bookings/{id}/complete`

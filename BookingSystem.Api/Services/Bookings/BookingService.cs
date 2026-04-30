@@ -16,22 +16,6 @@ namespace BookingSystem.Api.Services.Bookings
             _context = context;
         }
 
-        // Determines the current booking status based on time
-        private static BookingStatus GetCurrentStatus(Booking booking)
-        {
-            if (booking.Status == BookingStatus.Cancelled)
-            {
-                return BookingStatus.Cancelled;
-            }
-
-            if (booking.EndTime <= DateTime.UtcNow)
-            {
-                return BookingStatus.Completed;
-            }
-
-            return booking.Status;
-        }
-
         // Retrieves filtered and paginated bookings as DTOs
         public async Task<IEnumerable<BookingDto>> GetBookingsAsync(BookingQueryDto query)
         {
@@ -61,6 +45,11 @@ namespace BookingSystem.Api.Services.Bookings
                 bookingsQuery = bookingsQuery.Where(b => b.EndTime <= query.ToDate.Value);
             }
 
+            if (query.Status.HasValue)
+            {
+                bookingsQuery = bookingsQuery.Where(b => b.Status == query.Status.Value);
+            }
+
             return await bookingsQuery
                 .OrderBy(b => b.StartTime)
                 .Skip((page - 1) * pageSize)
@@ -72,7 +61,7 @@ namespace BookingSystem.Api.Services.Bookings
                     ResourceId = b.ResourceId,
                     StartTime = b.StartTime,
                     EndTime = b.EndTime,
-                    Status = GetCurrentStatus(b),
+                    Status = b.Status,
                     Notes = b.Notes
                 })
                 .ToListAsync();
@@ -149,7 +138,7 @@ namespace BookingSystem.Api.Services.Bookings
                     ResourceId = b.ResourceId,
                     StartTime = b.StartTime,
                     EndTime = b.EndTime,
-                    Status = GetCurrentStatus(b),
+                    Status = b.Status,
                     Notes = b.Notes
                 })
                 .FirstOrDefaultAsync();
@@ -221,7 +210,7 @@ namespace BookingSystem.Api.Services.Bookings
                 ResourceId = booking.ResourceId,
                 StartTime = booking.StartTime,
                 EndTime = booking.EndTime,
-                Status = GetCurrentStatus(booking),
+                Status = booking.Status,
                 Notes = booking.Notes
             };
 
