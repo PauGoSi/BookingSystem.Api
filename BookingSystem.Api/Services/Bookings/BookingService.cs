@@ -238,6 +238,16 @@ namespace BookingSystem.Api.Services.Bookings
                 return (false, "Booking not found.", 404);
             }
 
+            if (booking.Status == BookingStatus.Completed)
+            {
+                return (false, "Completed bookings cannot be modified.", 400);
+            }
+
+            if (booking.Status == BookingStatus.Cancelled)
+            {
+                return (false, "Cancelled bookings cannot be modified.", 400);
+            }
+
             // Validate time
             if (dto.StartTime >= dto.EndTime)
             {

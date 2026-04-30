@@ -25,7 +25,7 @@ namespace BookingSystem.Api.BackgroundServices
             {
                 await UpdateCompletedBookingsAsync(stoppingToken);
 
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
             }
         }
 

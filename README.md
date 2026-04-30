@@ -212,6 +212,7 @@ The following rules apply:
    For updating an existing booking (`PUT /api/bookings`):
    - If the validations 1., 2., 4., 6., 11., 12. pass, the existing booking is updated successfully
    - Returns `204 No Content`
+   - Note: Completed and cancelled bookings are immutable and cannot be modified.
 
    For deleting an existing booking (`DELETE /api/bookings`):
    - If validation 7. pass, the existing booking is deleted successfully
