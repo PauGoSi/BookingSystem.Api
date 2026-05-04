@@ -1,11 +1,10 @@
 # BookingSystem API
 
-A RESTful backend system built with ASP.NET Core for managing bookings, users, roles, and resources.
+A production-style booking system built with ASP.NET Core.
 
-## Purpose
-This project simulates a real-world booking system where users can reserve resources while ensuring data integrity and preventing conflicts.
+## Overview
 
-The goal was to design a clean, maintainable backend with clear separation of concerns and realistic business rules.
+This project demonstrates how to design and implement a backend system with real-world business logic, including booking conflict detection, validation, and background processing. 
 
 ### Example Booking Flow
 ```
@@ -16,10 +15,11 @@ The goal was to design a clean, maintainable backend with clear separation of co
 5. User or admin can cancel or complete bookings manually  
 ```
 ## Key Features
+
 - Booking management with conflict detection (no overlapping bookings)
-- Relational data model (Users, Roles, Resources, Bookings)
+- Clean layered architecture (Controllers, Services, DTOs)
+- Background service for automatic booking status updates
 - Validation rules to ensure data integrity
-- Layered architecture (Controllers, Services, DTOs)
 - Pagination and filtering support
 
 ---
@@ -61,6 +61,69 @@ dotnet add package Microsoft.EntityFrameworkCore.Tools --version 10.0.7
 dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.7
 ```
 ---
+## Authentication (JWT)
+
+### Required packages
+
+Before running the project, ensure the following NuGet packages are installed:
+
+```PowerShell
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+dotnet add package Swashbuckle.AspNetCore --version 6.6.2
+```
+
+### Configuration
+
+Add the following JWT settings in `appsettings.json`:
+
+```JSON
+"Jwt": {
+  "Key": "your-super-secret-key",
+  "Issuer": "BookingSystem.Api",
+  "Audience": "BookingSystem.Api"
+}
+```
+### Security note
+
+The JWT key in `appsettings.json` is for development purposes only. In a production environment, secrets should be stored securely using:
+- Environment variables
+- Secret managers (e.g. Azure Key Vault)
+
+### How authentication works
+
+1. User logs in via:
+
+```
+POST /api/auth/login
+```
+2. API returns a JWT token
+3. Token must be included in requests:
+```
+Authorization: Bearer {token}
+```
+
+### Swagger (Testing authentication)
+
+Swagger UI supports JWT authentication:
+1. Click Authorize
+2. Enter:
+```
+Bearer YOUR_TOKEN_HERE
+```
+3. Call secured endpoints
+
+### Notes
+
+ - Authentication is handled using JWT Bearer tokens
+ - Authorization middleware is enabled in `Program.cs`
+ - Swagger is configured to support authenticated requests
+ - Tokens are validated using issuer, audience, and signing key
+
+### Future improvements
+
+- Role-based authorization (Admin/User)
+- Refresh tokens
+- Token expiration handling
 
 ## ER Diagram
 
@@ -85,21 +148,11 @@ dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.7
 - `GET /api/bookings?userId=1`
 - `GET /api/bookings?fromDate=2026-05-01&toDate=2026-05-31`
 
-Since `BookingStatus` is an enum
+`BookingStatus` API endpoint url supports string representations of enum values. 
 
-```C#
-public enum BookingStatus
-{
-    Active = 1,
-    Cancelled = 2,
-    Completed = 3
-}
-```
-its API endpoint url supports both numeric and string representations of enum values. 
-
-- `GET /api/bookings?status=Active` or `GET /api/bookings?status=1`
-- `GET /api/bookings?status=Cancelled` or `GET /api/bookings?status=2`
-- `GET /api/bookings?status=Completed` or `GET /api/bookings?status=3`
+- `GET /api/bookings?status=Active`
+- `GET /api/bookings?status=Cancelled`
+- `GET /api/bookings?status=Completed`
 
 Using string values (e.g. `Completed`) is recommended for better readability and maintainability. Note that the Swagger UI only accepts integer for `status`.  
 

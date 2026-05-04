@@ -1,10 +1,12 @@
 using BookingSystem.Api.DTOs.Booking;
 using BookingSystem.Api.Services.Bookings;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingSystem.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/bookings")]
     public class BookingsController : ControllerBase
     {
