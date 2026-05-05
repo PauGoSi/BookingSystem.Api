@@ -1,10 +1,12 @@
 # BookingSystem API
+> This project demonstrates a production-like ASP.NET Core API with authentication, authorization, background jobs, and business rules.
 
-A production-style booking system built with ASP.NET Core.
+A RESTful API built with ASP.NET Core for managing bookings, resources, users, and roles.
 
 ## Overview
 
-This project demonstrates how to design and implement a backend system with real-world business logic, including booking conflict detection, validation, and background processing. 
+The project demonstrates modern backend practices including layered architecture, JWT authentication, role-based authorization, background processing, and clean API design.
+
 
 ### Example Booking Flow
 ```
@@ -22,20 +24,6 @@ This project demonstrates how to design and implement a backend system with real
 - Validation rules to ensure data integrity
 - Pagination and filtering support
 
----
-
-## Features
-
-- CRUD for:
-  - Bookings
-  - Users
-  - Roles
-  - Resources
-- Foreign key relationships
-- DTO pattern implemented
-- Swagger UI for testing
-
----
 
 ## Tech Stack
 
@@ -121,7 +109,6 @@ Bearer YOUR_TOKEN_HERE
 
 ### Future improvements
 
-- Role-based authorization (Admin/User)
 - Refresh tokens
 - Token expiration handling
 
@@ -350,80 +337,65 @@ The following rules apply:
 
 ---
 
-## Architecture
-
-This project follows a clean, layered architecture with a clear separation of concerns:
+This project follows a clean, layered architecture with clear separation of concerns.
 
 ### Core Layers
 
 - **Controllers**  
   Handle HTTP requests and responses.  
-  Responsible only for routing, model binding, and returning appropriate HTTP status codes.
+  Responsible for routing, model binding, and returning appropriate HTTP status codes.
 
 - **Services**  
   Contain all business logic and validation rules.  
-  Ensure that controllers remain thin and logic is reusable and testable.
+  Keep controllers thin and logic reusable and testable.
 
 - **DTOs (Data Transfer Objects)**  
-  Define the structure of data exchanged between client and API.  
-  Prevent direct exposure of domain models.
+  Define API input/output models.  
+  Prevent direct exposure of domain entities.
 
 - **Data (DbContext)**  
-  Manages database access using Entity Framework Core.  
-  Responsible for persistence and querying.
+  Handles database access using Entity Framework Core.
 
 ---
 
 ### Supporting Layers
 
 - **Enums**  
-  Define strongly-typed domain values such as `BookingStatus`.  
-  Improve readability, maintainability, and prevent invalid states.
+  Strongly-typed domain values (e.g. `BookingStatus`).  
+  Improve readability and prevent invalid states.
 
 - **Middleware**  
   Handles cross-cutting concerns such as global error handling.  
-  Ensures consistent API responses and centralized exception management.
+  Ensures consistent API responses.
 
 - **BackgroundServices**  
-  Run system-level background processes independent of HTTP requests.  
-  Example: Automatically updating expired bookings to `Completed`.
+  Executes background processes independently of HTTP requests.  
+  Example: Automatically marks expired bookings as `Completed`.
+
+- **Seed (DbSeeder)**  
+  Seeds initial data such as roles and a development admin user.  
+  Ensures the system is usable immediately after setup.
 
 ---
 
 ### Design Principles
 
-Business logic is isolated in the service layer to ensure:
-
-- Clean and maintainable controllers  
-- Reusable domain logic  
-- Better separation of concerns  
-- Easier testing and scalability  
+- Separation of concerns  
+- Thin controllers  
+- Centralized business logic  
+- Secure-by-default API design  
+- Scalable and maintainable structure  
 
 ---
 
-### Time Handling
+## Time Handling
 
 All timestamps are stored and processed in **UTC** (`DateTime.UtcNow`).
 
-This ensures:
+- Avoids issues with time zones and daylight saving time  
+- Ensures consistent behavior across environments  
+- Clients are responsible for converting to local time  
 
-- Consistent behavior across different environments and time zones  
-- No issues with daylight saving time  
-- Reliable validation logic in the backend  
-
-All time-based business rules (e.g. preventing bookings in the past) are evaluated using UTC.
-
-Clients (e.g. frontend applications) are responsible for converting timestamps to the user's local time zone for display purposes. 
-
----
-
-## Getting Started
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/PauGoSi/BookingSystem.Api
-```
 ## API Documentation
 
 Swagger UI is available when running the application.
@@ -433,3 +405,132 @@ Typically:
 https://localhost:7223/swagger
 ```
 Note: The port may vary depending on your local setup.
+
+---
+
+## Authentication & Authorization
+
+This API uses **JWT (JSON Web Token)** authentication with **role-based authorization (RBAC)**.
+
+---
+
+### Authentication
+
+Authenticate via:
+
+```http
+POST /api/auth/login
+```
+---
+
+The API returns a JWT token which must be included in subsequent requests:
+
+```http
+Authorization: Bearer {token}
+```
+
+## Authorization (RBAC)
+
+Access is controlled using roles:
+
+| Role  | Permissions                          |
+|-------|--------------------------------------|
+| Admin | Full access to all resources         |
+| User  | Limited access (own bookings only)   |
+
+---
+
+### Examples
+
+- **Bookings**
+  - Users can only access their own bookings
+  - Admins can access all bookings
+
+- **Resources**
+  - All authenticated users can read
+  - Only Admins can create/update/delete
+
+- **Users & Roles**
+  - Admin only
+
+> Access control is enforced both at controller level and within the service layer.
+
+### What happens on startup
+
+- Database migrations are applied
+- Roles are created if missing
+- Admin user is created if missing
+
+---
+
+
+## Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/PauGoSi/BookingSystem.Api
+cd BookingSystem.Api/
+```
+
+### 2. Apply database migrations
+
+```bash
+dotnet restore
+dotnet ef database update
+```
+
+### 3. Run the application
+
+```bash
+dotnet run
+```
+
+## API Documentation
+
+Swagger UI is available when running the application:
+
+```bach
+https://localhost:7223/swagger
+```
+
+## Swagger Authentication
+
+1. Login via `/api/auth/login`
+2. Copy the returned JWT token
+3. Click **Authorize** in Swagger UI
+4. Enter:
+
+```bash
+Bearer YOUR_TOKEN_HERE
+```
+
+## Features
+
+- CRUD operations for bookings, users, roles, and resources  
+- Pagination and filtering  
+- Booking status lifecycle (`Active`, `Cancelled`, `Completed`)  
+- Background job for automatic status updates  
+- JWT authentication  
+- Role-based authorization (RBAC)  
+- Ownership validation  
+- Global error handling  
+- Clean API routes  
+- Seed data for easy setup  
+
+## Default Admin Login (Development)
+
+To quickly access the system, a default admin user is created on startup:
+```
+Email: admin@bookingsystem.local 
+Password: Admin123!
+```
+
+> This account is for development purposes only.
+> Change credentials in production environments.
+
+## Security Notes
+
+- JWT key in `appsettings.json` is for development only  
+- Use environment variables or secret managers in production  
+- Passwords are hashed using ASP.NET Core Identity utilities  

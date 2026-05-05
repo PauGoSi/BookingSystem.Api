@@ -12,12 +12,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using BookingSystem.Api.Data.Seed;
 
 namespace BookingSystem.Api
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -106,6 +107,7 @@ namespace BookingSystem.Api
             app.UseAuthorization();
             app.MapControllers();
 
+            await DbSeeder.SeedAsync(app.Services);
             app.Run();
         }
     }

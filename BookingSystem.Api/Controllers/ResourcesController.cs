@@ -1,10 +1,12 @@
 ﻿using BookingSystem.Api.DTOs.Resource;
 using BookingSystem.Api.Services.Resources;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookingSystem.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/resources")]
     public class ResourcesController : ControllerBase
     {
@@ -40,6 +42,7 @@ namespace BookingSystem.Api.Controllers
 
         // Creates a new resource
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ResourceDto>> CreateResource(CreateResourceDto dto)
         {
             var result = await _resourceService.CreateResourceAsync(dto);
@@ -53,6 +56,7 @@ namespace BookingSystem.Api.Controllers
 
         // Updates an existing resource
         [HttpPut("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateResource([FromRoute] int id, UpdateResourceDto dto)
         {
             var result = await _resourceService.UpdateResourceAsync(id, dto);
@@ -67,6 +71,7 @@ namespace BookingSystem.Api.Controllers
 
         // Deletes a resource
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteResource([FromRoute] int id)
         {
             var result = await _resourceService.DeleteResourceAsync(id);

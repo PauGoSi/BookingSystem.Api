@@ -17,7 +17,7 @@ namespace BookingSystem.Api.Services.Bookings
         }
 
         // Retrieves filtered and paginated bookings as DTOs
-        public async Task<IEnumerable<BookingDto>> GetBookingsAsync(BookingQueryDto query)
+        public async Task<IEnumerable<BookingDto>> GetBookingsAsync(BookingQueryDto query, int currentUserId, bool isAdmin)
         {
             var page = query.Page < 1 ? 1 : query.Page;
             var pageSize = query.PageSize < 1 ? 10 : query.PageSize;
@@ -25,9 +25,9 @@ namespace BookingSystem.Api.Services.Bookings
 
             var bookingsQuery = _context.Bookings.AsQueryable();
 
-            if (query.UserId.HasValue)
+            if (!isAdmin)
             {
-                bookingsQuery = bookingsQuery.Where(b => b.UserId == query.UserId.Value);
+                bookingsQuery = bookingsQuery.Where(b => b.UserId == currentUserId);
             }
 
             if (query.ResourceId.HasValue)
@@ -68,7 +68,7 @@ namespace BookingSystem.Api.Services.Bookings
         }
 
         // Cancels a booking
-        public async Task<(bool Success, string? Error, int StatusCode)> CancelBookingAsync(int id)
+        public async Task<(bool Success, string? Error, int StatusCode)> CancelBookingAsync(int id, int currentUserId, bool isAdmin)
         {
             var booking = await _context.Bookings.FindAsync(id);
 
@@ -95,7 +95,7 @@ namespace BookingSystem.Api.Services.Bookings
         }
 
         // Completes a booking
-        public async Task<(bool Success, string? Error, int StatusCode)> CompleteBookingAsync(int id)
+        public async Task<(bool Success, string? Error, int StatusCode)> CompleteBookingAsync(int id, int currentUserId, bool isAdmin)
         {
             var booking = await _context.Bookings.FindAsync(id);
 
@@ -127,10 +127,16 @@ namespace BookingSystem.Api.Services.Bookings
         }
 
         // Retrieves a single booking by id
-        public async Task<BookingDto?> GetBookingByIdAsync(int id)
+        public async Task<BookingDto?> GetBookingByIdAsync(int id, int currentUserId, bool isAdmin)
         {
-            return await _context.Bookings
-                .Where(b => b.Id == id)
+            var bookingQuery = _context.Bookings.Where(b => b.Id == id);
+
+            if (!isAdmin)
+            {
+                bookingQuery = bookingQuery.Where(b => b.UserId == currentUserId);
+            }
+
+            return await bookingQuery
                 .Select(b => new BookingDto
                 {
                     Id = b.Id,
@@ -145,8 +151,8 @@ namespace BookingSystem.Api.Services.Bookings
         }
 
         // Creates a new booking with validation and returns result
-        public async Task<(bool Success, string? Error, int StatusCode, BookingDto? Data)> CreateBookingAsync(CreateBookingDto dto)
-        {
+        public async Task<(bool Success, string? Error, int StatusCode, BookingDto? Data)> CreateBookingAsync(CreateBookingDto dto, int currentUserId, bool isAdmin)
+        {   
             // Validates that start time is earlier than end time
             if (dto.StartTime >= dto.EndTime)
             {
@@ -159,7 +165,7 @@ namespace BookingSystem.Api.Services.Bookings
             }
 
             // Checks that the user exists
-            var userExists = await _context.Users.AnyAsync(u => u.Id == dto.UserId);
+            var userExists = await _context.Users.AnyAsync(u => u.Id == currentUserId);
             if (!userExists)
             {
                 return (false, "User not found.", 404, null);
@@ -191,7 +197,7 @@ namespace BookingSystem.Api.Services.Bookings
 
             var booking = new Booking
             {
-                UserId = dto.UserId,
+                UserId = currentUserId,
                 ResourceId = dto.ResourceId,
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime,
@@ -218,9 +224,14 @@ namespace BookingSystem.Api.Services.Bookings
         }
 
         // Updates an existing booking with validation
-        public async Task<(bool Success, string? Error, int StatusCode)> UpdateBookingAsync(int id, UpdateBookingDto dto)
+        public async Task<(bool Success, string? Error, int StatusCode)> UpdateBookingAsync(int id, UpdateBookingDto dto, int currentUserId, bool isAdmin)
         {
             var booking = await _context.Bookings.FindAsync(id);
+
+            if (!isAdmin && booking.UserId != currentUserId)
+            {
+                return (false, "You are not allowed to access this booking.", 403);
+            }
 
             if (booking == null)
             {
@@ -246,13 +257,6 @@ namespace BookingSystem.Api.Services.Bookings
             if (dto.StartTime <= DateTime.UtcNow)
             {
                 return (false, "StartTime must be in the future.", 400);
-            }
-
-            // Check user exists
-            var userExists = await _context.Users.AnyAsync(u => u.Id == dto.UserId);
-            if (!userExists)
-            {
-                return (false, "User not found.", 404);
             }
 
             // Check resource exists
@@ -281,7 +285,6 @@ namespace BookingSystem.Api.Services.Bookings
             }
 
             // Update fields
-            booking.UserId = dto.UserId;
             booking.ResourceId = dto.ResourceId;
             booking.StartTime = dto.StartTime;
             booking.EndTime = dto.EndTime;
@@ -293,9 +296,14 @@ namespace BookingSystem.Api.Services.Bookings
         }
 
         // Deletes a booking by id
-        public async Task<(bool Success, string? Error, int StatusCode)> DeleteBookingAsync(int id)
+        public async Task<(bool Success, string? Error, int StatusCode)> DeleteBookingAsync(int id, int currentUserId, bool isAdmin)
         {
             var booking = await _context.Bookings.FindAsync(id);
+
+            if (!isAdmin && booking.UserId != currentUserId)
+            {
+                return (false, "You are not allowed to access this booking.", 403);
+            }
 
             if (booking == null)
             {

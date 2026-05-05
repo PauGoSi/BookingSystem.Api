@@ -1,10 +1,12 @@
 ﻿using BookingSystem.Api.DTOs.User;
 using BookingSystem.Api.Services.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookingSystem.Api.Controllers
 {
     [ApiController]
+    [Authorize(Roles = "Admin")]
     [Route("api/users")]
     public class UsersController : ControllerBase
     {

@@ -4,25 +4,18 @@ namespace BookingSystem.Api.Services.Bookings
 {
     public interface IBookingService
     {
-        // Retrieves all bookings
-        Task<IEnumerable<BookingDto>> GetBookingsAsync(BookingQueryDto query);
+        Task<IEnumerable<BookingDto>> GetBookingsAsync(BookingQueryDto query, int currentUserId, bool isAdmin);
 
-        // PATCH /api/bookings/{id}/cancel
-        Task<(bool Success, string? Error, int StatusCode)> CancelBookingAsync(int id);
+        Task<BookingDto?> GetBookingByIdAsync(int id, int currentUserId, bool isAdmin);
 
-        // Completes a booking
-        Task<(bool Success, string? Error, int StatusCode)> CompleteBookingAsync(int id);
+        Task<(bool Success, string? Error, int StatusCode, BookingDto? Data)> CreateBookingAsync(CreateBookingDto dto, int currentUserId, bool isAdmin);
 
-        // Retrieves a single booking by id
-        Task<BookingDto?> GetBookingByIdAsync(int id);
+        Task<(bool Success, string? Error, int StatusCode)> UpdateBookingAsync(int id, UpdateBookingDto dto, int currentUserId, bool isAdmin);
 
-        // Creates a new booking with validation result
-        Task<(bool Success, string? Error, int StatusCode, BookingDto? Data)> CreateBookingAsync(CreateBookingDto dto);
+        Task<(bool Success, string? Error, int StatusCode)> DeleteBookingAsync(int id, int currentUserId, bool isAdmin);
 
-        // Updates an existing booking
-        Task<(bool Success, string? Error, int StatusCode)> UpdateBookingAsync(int id, UpdateBookingDto dto);
+        Task<(bool Success, string? Error, int StatusCode)> CancelBookingAsync(int id, int currentUserId, bool isAdmin);
 
-        // Deletes a booking by id
-        Task<(bool Success, string? Error, int StatusCode)> DeleteBookingAsync(int id);
+        Task<(bool Success, string? Error, int StatusCode)> CompleteBookingAsync(int id, int currentUserId, bool isAdmin);
     }
 }

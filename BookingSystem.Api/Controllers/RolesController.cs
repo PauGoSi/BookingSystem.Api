@@ -1,10 +1,12 @@
 ﻿using BookingSystem.Api.DTOs.Role;
 using BookingSystem.Api.Services.Roles;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookingSystem.Api.Controllers
 {
     [ApiController]
+    [Authorize(Roles = "Admin")]
     [Route("api/roles")]
     public class RolesController : ControllerBase
     {

@@ -9,9 +9,6 @@ public class BookingQueryDto
     [FromQuery(Name = "pageSize")]
     public int PageSize { get; set; } = 10;
 
-    [FromQuery(Name = "userId")]
-    public int? UserId { get; set; }
-
     [FromQuery(Name = "resourceId")]
     public int? ResourceId { get; set; }
 
