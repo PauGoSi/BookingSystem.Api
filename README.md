@@ -1,5 +1,5 @@
 # BookingSystem API
-> This project demonstrates a production-like ASP.NET Core API with authentication, authorization, background jobs, and business rules.
+This project demonstrates a production-like ASP.NET Core API with authentication, authorization, background jobs, and business rules.
 
 A RESTful API built with ASP.NET Core for managing bookings, resources, users, and roles.
 
@@ -16,14 +16,21 @@ The project demonstrates modern backend practices including layered architecture
 4. Background service automatically updates expired bookings to `Completed`  
 5. User or admin can cancel or complete bookings manually  
 ```
-## Key Features
 
+## Key Features
 - Booking management with conflict detection (no overlapping bookings)
 - Clean layered architecture (Controllers, Services, DTOs)
+- CRUD operations for bookings, users, roles, and resources   
+- Booking status lifecycle (`Active`, `Cancelled`, `Completed`)  
 - Background service for automatic booking status updates
 - Validation rules to ensure data integrity
 - Pagination and filtering support
-
+- JWT authentication  
+- Role-based authorization (RBAC)  
+- Ownership validation  
+- Global error handling  
+- Clean API routes  
+- Seed data for easy setup 
 
 ## Tech Stack
 
@@ -41,15 +48,12 @@ This project requires:
 - .NET SDK (compatible with the project)
 - Entity Framework Core **10.0.7**
 
-All EF Core packages must use the **same version**,  
-otherwise the project may fail at build or runtime.
+All EF Core packages must use the **same version**, otherwise the project may fail at build or runtime.
 ```PowerShell
 dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 10.0.7
 dotnet add package Microsoft.EntityFrameworkCore.Tools --version 10.0.7
 dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.7
 ```
----
-## Authentication (JWT)
 
 ### Required packages
 
@@ -60,55 +64,9 @@ dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
 dotnet add package Swashbuckle.AspNetCore --version 6.6.2
 ```
 
-### Configuration
-
-Development JWT settings are included by default for local testing. The JWT key in `appsettings.json` is not intended for production use.
-
-### Security note
-
-The JWT key in `appsettings.json` is for development purposes only. In a production environment, secrets should be stored securely using:
-- Environment variables
-- Secret managers (e.g. Azure Key Vault)
-
-### How authentication works
-
-1. User logs in via:
-
-```
-POST /api/auth/login
-```
-2. API returns a JWT token
-3. Token must be included in requests:
-```
-Authorization: Bearer {token}
-```
-
-### Swagger (Testing authentication)
-
-Swagger UI supports JWT authentication:
-1. Click Authorize
-2. Enter:
-```
-Bearer YOUR_TOKEN_HERE
-```
-3. Call secured endpoints
-
-### Notes
-
- - Authentication is handled using JWT Bearer tokens
- - Authorization middleware is enabled in `Program.cs`
- - Swagger is configured to support authenticated requests
- - Tokens are validated using issuer, audience, and signing key
-
-### Future improvements
-
-- Refresh tokens for improved session management
-
 ## ER Diagram
 
 ![ER Diagram](docs/er-diagram.png)
-
----
 
 ## Data Model
 
@@ -116,7 +74,6 @@ Bearer YOUR_TOKEN_HERE
 - A **Booking** belongs to one **User**
 - A **Booking** uses one **Resource**
 
----
 
 ## API Endpoints
 
@@ -163,7 +120,6 @@ Using string values (e.g. `Completed`) is recommended for better readability and
 - `PUT /api/resources/{id}`
 - `DELETE /api/resources/{id}`
 
----
 ## Booking Business Rules & Validation
 
 The API enforces a set of validation rules to ensure data integrity and prevent invalid or conflicting bookings.
@@ -245,7 +201,6 @@ The following rules apply:
     - Returns `400 Bad Request` if the booking is already completed
 
 ---
-
 **Successful Booking**
 
    For creating a booking (`POST /api/bookings`):
@@ -327,8 +282,6 @@ The following rules apply:
 }
 ```
 
----
-
 This project follows a clean, layered architecture with clear separation of concerns.
 
 ### Core Layers
@@ -348,7 +301,7 @@ This project follows a clean, layered architecture with clear separation of conc
 - **Data (DbContext)**  
   Handles database access using Entity Framework Core.
 
----
+
 
 ### Supporting Layers
 
@@ -368,7 +321,6 @@ This project follows a clean, layered architecture with clear separation of conc
   Seeds initial data such as roles and a development admin user.  
   Ensures the system is usable immediately after setup.
 
----
 
 ### Design Principles
 
@@ -378,7 +330,6 @@ This project follows a clean, layered architecture with clear separation of conc
 - Secure-by-default API design  
 - Scalable and maintainable structure  
 
----
 
 ## Time Handling
 
@@ -398,28 +349,9 @@ https://localhost:7223/swagger
 ```
 Note: The port may vary depending on your local setup.
 
----
-
 ## Authentication & Authorization
 
 This API uses **JWT (JSON Web Token)** authentication with **role-based authorization (RBAC)**.
-
----
-
-### Authentication
-
-Authenticate via:
-
-```http
-POST /api/auth/login
-```
----
-
-The API returns a JWT token which must be included in subsequent requests:
-
-```http
-Authorization: Bearer {token}
-```
 
 ## Authorization (RBAC)
 
@@ -430,7 +362,6 @@ Access is controlled using roles:
 | Admin | Full access to all resources         |
 | User  | Limited access (own bookings only)   |
 
----
 
 ### Examples
 
@@ -452,8 +383,6 @@ Access is controlled using roles:
 - Database migrations are applied
 - Roles are created if missing
 - Admin user is created if missing
-
----
 
 
 ## Getting Started
@@ -485,30 +414,23 @@ Swagger UI is available when running the application:
 ```bach
 https://localhost:7223/swagger
 ```
+## Authentication (JWT)
+### How authentication works
 
-## Swagger Authentication
-
-1. Login via `/api/auth/login`
-2. Copy the returned JWT token
-3. Click **Authorize** in Swagger UI
-4. Enter:
-
+1. User logs in via:
+```
+POST /api/auth/login
+```
+2. Copy the returned JWT token.
+3. Click the **Authorize** button in Swagger UI.
+4. A popup window will appear. Enter:
 ```bash
 Bearer YOUR_TOKEN_HERE
 ```
-
-## Features
-
-- CRUD operations for bookings, users, roles, and resources  
-- Pagination and filtering  
-- Booking status lifecycle (`Active`, `Cancelled`, `Completed`)  
-- Background job for automatic status updates  
-- JWT authentication  
-- Role-based authorization (RBAC)  
-- Ownership validation  
-- Global error handling  
-- Clean API routes  
-- Seed data for easy setup  
+5. Click the `Authorize` button in the popup window.
+6. Click Close to close the popup window
+7. The user is now authenticated and can make requests until the JWT token expires after 60 minutes. 
+8. Expired JWT tokens are rejected by the API. Users must logout and log in again to obtain a new valid token. 
 
 ## Default Admin Login (Development)
 
