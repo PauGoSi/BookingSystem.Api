@@ -62,15 +62,8 @@ dotnet add package Swashbuckle.AspNetCore --version 6.6.2
 
 ### Configuration
 
-Add the following JWT settings in `appsettings.json`:
+Development JWT settings are included by default for local testing. The JWT key in `appsettings.json` is not intended for production use.
 
-```JSON
-"Jwt": {
-  "Key": "your-super-secret-key",
-  "Issuer": "BookingSystem.Api",
-  "Audience": "BookingSystem.Api"
-}
-```
 ### Security note
 
 The JWT key in `appsettings.json` is for development purposes only. In a production environment, secrets should be stored securely using:
@@ -109,8 +102,7 @@ Bearer YOUR_TOKEN_HERE
 
 ### Future improvements
 
-- Refresh tokens
-- Token expiration handling
+- Refresh tokens for improved session management
 
 ## ER Diagram
 
