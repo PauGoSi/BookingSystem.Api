@@ -90,7 +90,7 @@ dotnet add package Swashbuckle.AspNetCore --version 6.6.2
 - `GET /api/bookings?status=Cancelled`
 - `GET /api/bookings?status=Completed`
 
-Using string values (e.g. `Completed`) is recommended for better readability and maintainability. Note that the Swagger UI only accepts integer for `status`.  
+Using string values (e.g. `Completed`) is recommended for better readability and maintainability. 
 
 - `POST /api/bookings`
 - `PATCH /api/bookings/{id}/cancel`
