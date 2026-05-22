@@ -13,11 +13,7 @@ public class BookingServiceTests
     public async Task UpdateBookingAsync_ShouldReturn400_WhenBookingIsCompleted()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        using var context = new AppDbContext(options);
+        using var context = CreateDbContext();
 
         var booking = new Booking
         {
@@ -59,11 +55,7 @@ public class BookingServiceTests
     public async Task CreateBookingAsync_ShouldReturn409_WhenBookingOverlapsExistingBooking()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        using var context = new AppDbContext(options);
+        using var context = CreateDbContext();
 
         var user = new User
         {
@@ -126,5 +118,14 @@ public class BookingServiceTests
         result.StatusCode.Should().Be(409);
         result.Error.Should().Be("Resource is already booked in this time range.");
         result.Data.Should().BeNull();
+    }
+
+    private static AppDbContext CreateDbContext()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+
+        return new AppDbContext(options);
     }
 }
