@@ -448,3 +448,34 @@ Password: Admin123!
 - JWT key in `appsettings.json` is for development only  
 - Use environment variables or secret managers in production  
 - Passwords are hashed using ASP.NET Core Identity utilities  
+
+## Running Tests
+
+The project includes unit tests using:
+
+- xUnit
+- Entity Framework Core InMemory provider
+- FluentAssertions
+
+### Test Packages
+
+```bash
+dotnet add BookingSystem.Api.Tests package Microsoft.EntityFrameworkCore.InMemory --version 10.0.7
+
+dotnet add BookingSystem.Api.Tests package FluentAssertions
+```
+
+### Why These Packages Are Used
+
+- `Microsoft.EntityFrameworkCore.InMemory`
+  - Used for lightweight in-memory database testing
+  - Allows testing business logic without a real SQL Server instance
+
+- `FluentAssertions`
+  - Provides more readable and expressive test assertions
+
+### Run Tests
+
+```bash
+dotnet test
+```
