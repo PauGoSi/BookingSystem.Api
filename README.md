@@ -39,29 +39,119 @@ The project demonstrates modern backend practices including layered architecture
 - Swagger / OpenAPI
 - C#
 
----
+## Getting Started
+### What happens on startup
+- Database migrations are applied
+- Roles are created if missing
+- Admin user is created if missing
 
-## Important (Versioning)
+### 1. Clone the repository
 
-This project requires:
-
-- .NET SDK (compatible with the project)
-- Entity Framework Core **10.0.7**
-
-All EF Core packages must use the **same version**, otherwise the project may fail at build or runtime.
-```PowerShell
-dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 10.0.7
-dotnet add package Microsoft.EntityFrameworkCore.Tools --version 10.0.7
-dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.7
+```bash
+git clone https://github.com/PauGoSi/BookingSystem.Api
+cd BookingSystem.Api/
 ```
 
-### Required packages
+### 2. Apply database migrations
 
-Before running the project, ensure the following NuGet packages are installed:
+```bash
+dotnet restore
+dotnet ef database update
+```
 
-```PowerShell
-dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
-dotnet add package Swashbuckle.AspNetCore --version 6.6.2
+### 3. Run the application
+
+```bash
+dotnet run
+```
+
+## API Documentation
+
+Swagger UI is available when running the application.
+
+Typically:
+```bash
+https://localhost:7223/swagger
+```
+Note: The port may vary depending on your local setup.
+
+## Authentication (JWT)
+### How authentication works
+
+1. User logs in via:
+```
+POST /api/auth/login
+```
+2. Copy the returned JWT token.
+3. Click the **Authorize** button in Swagger UI.
+4. A popup window will appear. Enter:
+```bash
+Bearer YOUR_TOKEN_HERE
+```
+5. Click the `Authorize` button in the popup window.
+6. Click Close to close the popup window
+7. The user is now authenticated and can make requests until the JWT token expires after 60 minutes. 
+8. Expired JWT tokens are rejected by the API. Users must logout and log in again to obtain a new valid token. 
+
+## Default Admin Login (Development)
+
+To quickly access the system, a default admin user is created on startup:
+```
+Email: admin@bookingsystem.local 
+Password: Admin123!
+```
+
+> This account is for development purposes only.
+> Change credentials in production environments.
+
+## Security Notes
+
+- JWT key in `appsettings.json` is for development only  
+- Use environment variables or secret managers in production  
+- Passwords are hashed using ASP.NET Core Identity utilities  
+
+## Running Tests
+
+The solution includes a dedicated xUnit test project:
+
+- `BookingSystem.Api.Tests`
+
+### Test Stack
+
+- xUnit
+- Entity Framework Core InMemory Provider
+
+### Run Tests
+
+```bash
+dotnet test
+```
+
+### Notes
+
+The required NuGet packages are already included in the test project and will automatically be restored when running:
+
+```bash
+dotnet restore
+```
+
+The tests use the EF Core InMemory database provider to isolate business logic and avoid dependency on a real SQL Server instance during unit testing.
+
+## Core Dependencies
+
+| Package | Purpose |
+|---|---|
+| `Microsoft.AspNetCore.Authentication.JwtBearer` | JWT Bearer authentication and token validation |
+| `Microsoft.EntityFrameworkCore.SqlServer` | SQL Server database provider for Entity Framework Core |
+| `Microsoft.EntityFrameworkCore.Tools` | EF Core migration and database tooling |
+| `Microsoft.EntityFrameworkCore.Design` | Design-time support for Entity Framework Core |
+| `Swashbuckle.AspNetCore` | Swagger/OpenAPI documentation generation |
+| `Swashbuckle.AspNetCore.SwaggerUI` | Interactive Swagger UI for testing API endpoints |
+
+All package references are managed through the project `.csproj` files and are automatically restored using:
+
+```bash
+dotnet restore
 ```
 
 ## ER Diagram
@@ -339,16 +429,6 @@ All timestamps are stored and processed in **UTC** (`DateTime.UtcNow`).
 - Ensures consistent behavior across environments  
 - Clients are responsible for converting to local time  
 
-## API Documentation
-
-Swagger UI is available when running the application.
-
-Typically:
-```bash
-https://localhost:7223/swagger
-```
-Note: The port may vary depending on your local setup.
-
 ## Authentication & Authorization
 
 This API uses **JWT (JSON Web Token)** authentication with **role-based authorization (RBAC)**.
@@ -377,105 +457,3 @@ Access is controlled using roles:
   - Admin only
 
 > Access control is enforced both at controller level and within the service layer.
-
-### What happens on startup
-
-- Database migrations are applied
-- Roles are created if missing
-- Admin user is created if missing
-
-
-## Getting Started
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/PauGoSi/BookingSystem.Api
-cd BookingSystem.Api/
-```
-
-### 2. Apply database migrations
-
-```bash
-dotnet restore
-dotnet ef database update
-```
-
-### 3. Run the application
-
-```bash
-dotnet run
-```
-
-## API Documentation
-
-Swagger UI is available when running the application:
-
-```bach
-https://localhost:7223/swagger
-```
-## Authentication (JWT)
-### How authentication works
-
-1. User logs in via:
-```
-POST /api/auth/login
-```
-2. Copy the returned JWT token.
-3. Click the **Authorize** button in Swagger UI.
-4. A popup window will appear. Enter:
-```bash
-Bearer YOUR_TOKEN_HERE
-```
-5. Click the `Authorize` button in the popup window.
-6. Click Close to close the popup window
-7. The user is now authenticated and can make requests until the JWT token expires after 60 minutes. 
-8. Expired JWT tokens are rejected by the API. Users must logout and log in again to obtain a new valid token. 
-
-## Default Admin Login (Development)
-
-To quickly access the system, a default admin user is created on startup:
-```
-Email: admin@bookingsystem.local 
-Password: Admin123!
-```
-
-> This account is for development purposes only.
-> Change credentials in production environments.
-
-## Security Notes
-
-- JWT key in `appsettings.json` is for development only  
-- Use environment variables or secret managers in production  
-- Passwords are hashed using ASP.NET Core Identity utilities  
-
-## Running Tests
-
-The project includes unit tests using:
-
-- xUnit
-- Entity Framework Core InMemory provider
-- FluentAssertions
-
-### Test Packages
-
-```bash
-dotnet add BookingSystem.Api.Tests package Microsoft.EntityFrameworkCore.InMemory --version 10.0.7
-
-dotnet add BookingSystem.Api.Tests package FluentAssertions
-```
-
-### Why These Packages Are Used
-
-- `Microsoft.EntityFrameworkCore.InMemory`
-  - Used for lightweight in-memory database testing
-  - Allows testing business logic without a real SQL Server instance
-
-- `FluentAssertions`
-  - Provides more readable and expressive test assertions
-
-### Run Tests
-
-```bash
-dotnet test
-```

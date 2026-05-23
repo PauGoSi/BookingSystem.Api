@@ -1,23 +1,26 @@
 ﻿using BookingSystem.Api.Enums;
 using Microsoft.AspNetCore.Mvc;
 
-public class BookingQueryDto
+namespace BookingSystem.Api.DTOs.Booking
 {
-    [FromQuery(Name = "page")]
-    public int Page { get; set; } = 1;
+    public class BookingQueryDto
+    {
+        [FromQuery(Name = "page")]
+        public int Page { get; set; } = 1;
 
-    [FromQuery(Name = "pageSize")]
-    public int PageSize { get; set; } = 10;
+        [FromQuery(Name = "pageSize")]
+        public int PageSize { get; set; } = 10;
 
-    [FromQuery(Name = "resourceId")]
-    public int? ResourceId { get; set; }
+        [FromQuery(Name = "resourceId")]
+        public int? ResourceId { get; set; }
 
-    [FromQuery(Name = "fromDate")]
-    public DateTime? FromDate { get; set; }
+        [FromQuery(Name = "fromDate")]
+        public DateTime? FromDate { get; set; }
 
-    [FromQuery(Name = "toDate")]
-    public DateTime? ToDate { get; set; }
+        [FromQuery(Name = "toDate")]
+        public DateTime? ToDate { get; set; }
 
-    [FromQuery(Name = "status")]
-    public BookingStatus? Status { get; set; }
+        [FromQuery(Name = "status")]
+        public BookingStatus? Status { get; set; }
+    }
 }
