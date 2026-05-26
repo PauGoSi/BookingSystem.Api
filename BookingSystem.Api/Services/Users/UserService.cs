@@ -2,17 +2,20 @@
 using BookingSystem.Api.DTOs.User;
 using BookingSystem.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace BookingSystem.Api.Services.Users
 {
     public class UserService : IUserService
     {
         private readonly AppDbContext _context;
+        private readonly PasswordHasher<User> _passwordHasher;
 
-        // Injects database context for user data access
+        // Injects database context for user data access and password hasher
         public UserService(AppDbContext context)
         {
             _context = context;
+            _passwordHasher = new PasswordHasher<User>();
         }
 
         // Retrieves all users as DTOs
@@ -70,6 +73,11 @@ namespace BookingSystem.Api.Services.Users
                 return (false, "Email is already in use.", 409, null);
             }
 
+            if (string.IsNullOrWhiteSpace(dto.Password))
+            {
+                return (false, "Password is required.", 400, null);
+            }
+
             var roleExists = await _context.Roles.AnyAsync(r => r.Id == dto.RoleId);
             if (!roleExists)
             {
@@ -81,10 +89,12 @@ namespace BookingSystem.Api.Services.Users
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 Email = dto.Email,
-                PasswordHash = dto.PasswordHash,
+                PasswordHash = string.Empty,
                 RoleId = dto.RoleId,
                 CreatedAt = DateTime.UtcNow
             };
+
+            user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
