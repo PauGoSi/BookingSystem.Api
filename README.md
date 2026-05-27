@@ -431,29 +431,84 @@ All timestamps are stored and processed in **UTC** (`DateTime.UtcNow`).
 
 ## Authentication & Authorization
 
-This API uses **JWT (JSON Web Token)** authentication with **role-based authorization (RBAC)**.
+This API uses **JWT (JSON Web Token)** authentication with **role-based access control (RBAC)**.
+
+All protected endpoints require a valid JWT access token.
+
 
 ## Authorization (RBAC)
 
-Access is controlled using roles:
+Access is controlled using user roles and ownership-based authorization rules.
 
-| Role  | Permissions                          |
-|-------|--------------------------------------|
-| Admin | Full access to all resources         |
-| User  | Limited access (own bookings only)   |
+| Role  | Permissions |
+|--------|-------------|
+| Admin  | Full access to all resources and bookings |
+| User   | Limited access to own bookings and profile |
 
 
-### Examples
+## Booking Authorization Rules
 
-- **Bookings**
-  - Users can only access their own bookings
-  - Admins can access all bookings
+### User Permissions
 
-- **Resources**
-  - All authenticated users can read
-  - Only Admins can create/update/delete
+Authenticated users can:
 
-- **Users & Roles**
-  - Admin only
+- Create bookings
+- View their own bookings
+- Cancel their own active bookings
 
-> Access control is enforced both at controller level and within the service layer.
+Authenticated users cannot:
+
+- Access other users' bookings
+- Cancel other users' bookings
+- Manually complete bookings
+
+
+### Admin Permissions
+
+Admins can:
+
+- Access all bookings
+- Cancel any booking
+- Manually complete bookings
+- Manage users, roles, and resources
+
+
+## Booking Business Rules
+
+The API enforces several business rules for booking lifecycle management:
+
+- Users can only access and manage their own bookings
+- Admins can access and manage all bookings
+- Completed bookings cannot be cancelled
+- Cancelled bookings cannot be completed
+- Bookings cannot be completed before `EndTime` has passed
+- Only admins can manually complete bookings
+- Booking conflicts are prevented for overlapping time periods
+
+
+## Resource Authorization
+
+### Read Access
+- All authenticated users can view resources
+
+### Write Access
+Only admins can:
+
+- Create resources
+- Update resources
+- Delete resources
+
+
+## User & Role Management
+
+User and role management endpoints are restricted to admins only.
+
+
+## Security
+
+Authorization and validation rules are enforced both:
+
+- At controller level using `[Authorize]` attributes
+- Within the service layer using business-rule validation
+
+This ensures that authorization rules remain protected even if endpoints are called outside normal controller flows.
