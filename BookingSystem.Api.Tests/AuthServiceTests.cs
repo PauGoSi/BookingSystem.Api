@@ -11,6 +11,48 @@ namespace BookingSystem.Api.Tests
     {
         // RegisterAsync tests
         [Fact]
+        public async Task RegisterAsync_ShouldAssignUserRole_ToNewUsers()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+            var configuration = CreateConfiguration();
+
+            var role = new Role
+            {
+                Id = 1,
+                Name = "User"
+            };
+
+            context.Roles.Add(role);
+            await context.SaveChangesAsync();
+
+            var service = new AuthService(context, configuration);
+
+            var dto = new DTOs.Auth.RegisterDto
+            {
+                FirstName = "Test",
+                LastName = "User",
+                Email = "test@example.com",
+                Password = "Password123!"
+            };
+
+            // Act
+            var result = await service.RegisterAsync(dto);
+
+            // Assert
+            Assert.True(result.Success);
+
+            var savedUser = await context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == dto.Email);
+
+            Assert.NotNull(savedUser);
+
+            Assert.Equal(1, savedUser!.RoleId);
+            Assert.Equal("User", savedUser.Role.Name);
+        }
+
+        [Fact]
         public async Task RegisterAsync_ShouldReturn201_WhenUserIsValid()
         {
             // Arrange
@@ -28,8 +70,7 @@ namespace BookingSystem.Api.Tests
                 FirstName = "Test",
                 LastName = "User",
                 Email = "test@example.com",
-                Password = "Password123!",
-                RoleId = 1
+                Password = "Password123!"
             };
 
             // Act
@@ -44,7 +85,6 @@ namespace BookingSystem.Api.Tests
             Assert.Equal("Test", result.Data!.FirstName);
             Assert.Equal("User", result.Data.LastName);
             Assert.Equal("test@example.com", result.Data.Email);
-            Assert.Equal(1, result.Data.RoleId);
 
             var savedUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "test@example.com");
 
@@ -74,8 +114,7 @@ namespace BookingSystem.Api.Tests
                 FirstName = "New",
                 LastName = "User",
                 Email = "test@example.com",
-                Password = "Password123!",
-                RoleId = 1
+                Password = "Password123!"
             };
 
             // Act
@@ -107,8 +146,7 @@ namespace BookingSystem.Api.Tests
                 FirstName = "Test",
                 LastName = "User",
                 Email = "test@example.com",
-                Password = "CorrectPassword123!",
-                RoleId = 1
+                Password = "CorrectPassword123!"
             };
 
             await service.RegisterAsync(registerDto);
@@ -142,28 +180,31 @@ namespace BookingSystem.Api.Tests
 
             var service = new AuthService(context, configuration);
 
+            const string password = "CorrectPassword123!";
+
             var registerDto = new DTOs.Auth.RegisterDto
             {
                 FirstName = "Test",
                 LastName = "User",
                 Email = "test@example.com",
-                Password = "CorrectPassword123!",
-                RoleId = 1
+                Password = password
             };
 
-            await service.RegisterAsync(registerDto);
+            var registerResult = await service.RegisterAsync(registerDto);
+
+            Assert.True(registerResult.Success, registerResult.Error);
 
             var loginDto = new DTOs.Auth.LoginDto
             {
                 Email = "test@example.com",
-                Password = "CorrectPassword123!"
+                Password = password
             };
 
             // Act
             var result = await service.LoginAsync(loginDto);
 
             // Assert
-            Assert.True(result.Success);
+            Assert.True(result.Success, result.Error);
             Assert.Equal(200, result.StatusCode);
             Assert.Null(result.Error);
 

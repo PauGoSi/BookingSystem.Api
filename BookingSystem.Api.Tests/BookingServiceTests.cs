@@ -555,6 +555,82 @@ namespace BookingSystem.Api.Tests
             Assert.Equal("Completed bookings cannot be cancelled.", result.Error);
         }
 
+        [Fact]
+        public async Task CancelBookingAsync_ShouldReturn403_WhenUserCancelsAnotherUsersBooking()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+
+            var booking = new Booking
+            {
+                Id = 1,
+                UserId = 2,
+                ResourceId = 1,
+                StartTime = DateTime.UtcNow.AddHours(1),
+                EndTime = DateTime.UtcNow.AddHours(2),
+                Status = BookingStatus.Active,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            context.Bookings.Add(booking);
+            await context.SaveChangesAsync();
+
+            var service = new BookingService(context);
+
+            // Act
+            var result = await service.CancelBookingAsync(
+                id: 1,
+                currentUserId: 1,
+                isAdmin: false
+            );
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.Equal(403, result.StatusCode);
+            Assert.Equal("You are not allowed to access this booking.", result.Error);
+
+            var savedBooking = await context.Bookings.FindAsync(1);
+            Assert.Equal(BookingStatus.Active, savedBooking!.Status);
+        }
+
+        [Fact]
+        public async Task CancelBookingAsync_ShouldReturn200_WhenAdminCancelsAnotherUsersBooking()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+
+            var booking = new Booking
+            {
+                Id = 1,
+                UserId = 2,
+                ResourceId = 1,
+                StartTime = DateTime.UtcNow.AddHours(1),
+                EndTime = DateTime.UtcNow.AddHours(2),
+                Status = BookingStatus.Active,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            context.Bookings.Add(booking);
+            await context.SaveChangesAsync();
+
+            var service = new BookingService(context);
+
+            // Act
+            var result = await service.CancelBookingAsync(
+                id: 1,
+                currentUserId: 1,
+                isAdmin: true
+            );
+
+            // Assert
+            Assert.True(result.Success);
+            Assert.Equal(200, result.StatusCode);
+            Assert.Null(result.Error);
+
+            var savedBooking = await context.Bookings.FindAsync(1);
+            Assert.Equal(BookingStatus.Cancelled, savedBooking!.Status);
+        }
+
         // CompleteBookingAsync tests
         [Fact]
         public async Task CompleteBookingAsync_ShouldReturn400_WhenBookingIsCancelled()
@@ -583,7 +659,7 @@ namespace BookingSystem.Api.Tests
             var result = await service.CompleteBookingAsync(
                 id: 1,
                 currentUserId: 1,
-                isAdmin: false
+                isAdmin: true
             );
 
             // Assert
@@ -619,13 +695,89 @@ namespace BookingSystem.Api.Tests
             var result = await service.CompleteBookingAsync(
                 id: 1,
                 currentUserId: 1,
-                isAdmin: false
+                isAdmin: true
             );
 
             // Assert
             Assert.False(result.Success);
             Assert.Equal(400, result.StatusCode);
             Assert.Equal("Booking cannot be completed before EndTime has passed.", result.Error);
+        }
+
+        [Fact]
+        public async Task CompleteBookingAsync_ShouldReturn200_WhenAdminCompletesAnotherUsersBooking()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+
+            var booking = new Booking
+            {
+                Id = 1,
+                UserId = 2,
+                ResourceId = 1,
+                StartTime = DateTime.UtcNow.AddHours(-2),
+                EndTime = DateTime.UtcNow.AddHours(-1),
+                Status = BookingStatus.Active,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            context.Bookings.Add(booking);
+            await context.SaveChangesAsync();
+
+            var service = new BookingService(context);
+
+            // Act
+            var result = await service.CompleteBookingAsync(
+                id: 1,
+                currentUserId: 1,
+                isAdmin: true
+            );
+
+            // Assert
+            Assert.True(result.Success);
+            Assert.Equal(204, result.StatusCode);
+            Assert.Null(result.Error);
+
+            var savedBooking = await context.Bookings.FindAsync(1);
+            Assert.Equal(BookingStatus.Completed, savedBooking!.Status);
+        }
+
+        [Fact]
+        public async Task CompleteBookingAsync_ShouldReturn403_WhenUserCompletesOwnBooking()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+
+            var booking = new Booking
+            {
+                Id = 1,
+                UserId = 1,
+                ResourceId = 1,
+                StartTime = DateTime.UtcNow.AddHours(-2),
+                EndTime = DateTime.UtcNow.AddHours(-1),
+                Status = BookingStatus.Active,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            context.Bookings.Add(booking);
+            await context.SaveChangesAsync();
+
+            var service = new BookingService(context);
+
+            // Act
+            var result = await service.CompleteBookingAsync(
+                id: 1,
+                currentUserId: 1,
+                isAdmin: false
+            );
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.Equal(403, result.StatusCode);
+            Assert.Equal("Only admins can manually complete bookings.", result.Error);
+
+            var savedBooking = await context.Bookings.FindAsync(1);
+            Assert.Equal(BookingStatus.Active, savedBooking!.Status);
         }
 
         // DeleteBookingAsync tests

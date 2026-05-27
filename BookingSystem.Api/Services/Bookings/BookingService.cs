@@ -77,6 +77,11 @@ namespace BookingSystem.Api.Services.Bookings
                 return (false, "Booking not found.", 404);
             }
 
+            if (!isAdmin && booking.UserId != currentUserId)
+            {
+                return (false, "You are not allowed to access this booking.", 403);
+            }
+
             if (booking.Status == BookingStatus.Cancelled)
             {
                 return (false, "Booking is already cancelled.", 400);
@@ -102,6 +107,11 @@ namespace BookingSystem.Api.Services.Bookings
             if (booking == null)
             {
                 return (false, "Booking not found.", 404);
+            }
+
+            if (!isAdmin)
+            {
+                return (false, "Only admins can manually complete bookings.", 403);
             }
 
             if (booking.Status == BookingStatus.Cancelled)
@@ -228,14 +238,14 @@ namespace BookingSystem.Api.Services.Bookings
         {
             var booking = await _context.Bookings.FindAsync(id);
 
-            if (!isAdmin && booking.UserId != currentUserId)
-            {
-                return (false, "You are not allowed to access this booking.", 403);
-            }
-
             if (booking == null)
             {
                 return (false, "Booking not found.", 404);
+            }
+
+            if (!isAdmin && booking.UserId != currentUserId)
+            {
+                return (false, "You are not allowed to access this booking.", 403);
             }
 
             if (booking.Status == BookingStatus.Completed)
@@ -300,14 +310,14 @@ namespace BookingSystem.Api.Services.Bookings
         {
             var booking = await _context.Bookings.FindAsync(id);
 
-            if (!isAdmin && booking.UserId != currentUserId)
-            {
-                return (false, "You are not allowed to access this booking.", 403);
-            }
-
             if (booking == null)
             {
                 return (false, "Booking not found.", 404);
+            }
+
+            if (!isAdmin && booking.UserId != currentUserId)
+            {
+                return (false, "You are not allowed to access this booking.", 403);
             }
 
             _context.Bookings.Remove(booking);

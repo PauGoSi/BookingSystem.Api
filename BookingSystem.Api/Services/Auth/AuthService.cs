@@ -28,6 +28,13 @@ namespace BookingSystem.Api.Services.Auth
         // Registers a new user with hashed password
         public async Task<(bool Success, string? Error, int StatusCode, UserDto? Data)> RegisterAsync(RegisterDto dto)
         {
+            var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
+
+            if (userRole == null)
+            {
+                return (false, "User role not found.", 500, null);
+            }
+
             if (string.IsNullOrWhiteSpace(dto.Email))
             {
                 return (false, "Email is required.", 400, null);
@@ -44,20 +51,14 @@ namespace BookingSystem.Api.Services.Auth
                 return (false, "Email is already in use.", 409, null);
             }
 
-            var roleExists = await _context.Roles.AnyAsync(r => r.Id == dto.RoleId);
-            if (!roleExists)
-            {
-                return (false, "Role not found.", 404, null);
-            }
-
             var user = new User
             {
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 Email = dto.Email,
-                RoleId = dto.RoleId,
                 CreatedAt = DateTime.UtcNow,
-                PasswordHash = string.Empty
+                PasswordHash = string.Empty,
+                RoleId = userRole.Id
             };
 
             user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
