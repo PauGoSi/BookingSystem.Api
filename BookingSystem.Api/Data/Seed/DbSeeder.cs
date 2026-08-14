@@ -44,7 +44,8 @@ namespace BookingSystem.Api.Data.Seed
                 await context.SaveChangesAsync();
             }
 
-            var adminEmail = "admin@bookingsystem.local";
+            var adminEmail = configuration["DevelopmentAdmin:Email"]
+                ?? "admin@bookingsystem.local";
 
             var adminPassword = configuration["DevelopmentAdmin:Password"]
                 ?? throw new InvalidOperationException(
