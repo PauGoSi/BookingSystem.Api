@@ -10,8 +10,8 @@ namespace BookingSystem.Api.Data.Seed
         public static async Task SeedAsync(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
-
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
             var passwordHasher = new PasswordHasher<User>();
 
             await context.Database.MigrateAsync();
@@ -46,6 +46,10 @@ namespace BookingSystem.Api.Data.Seed
 
             var adminEmail = "admin@bookingsystem.local";
 
+            var adminPassword = configuration["DevelopmentAdmin:Password"]
+                ?? throw new InvalidOperationException(
+                    "Development admin password is not configured.");
+
             var adminUser = await context.Users
                 .FirstOrDefaultAsync(u => u.Email == adminEmail);
 
@@ -61,7 +65,7 @@ namespace BookingSystem.Api.Data.Seed
                     PasswordHash = string.Empty
                 };
 
-                adminUser.PasswordHash = passwordHasher.HashPassword(adminUser, "Admin123!");
+                adminUser.PasswordHash = passwordHasher.HashPassword(adminUser, adminPassword);
 
                 context.Users.Add(adminUser);
                 await context.SaveChangesAsync();

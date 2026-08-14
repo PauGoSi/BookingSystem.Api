@@ -109,7 +109,11 @@ namespace BookingSystem.Api
             app.UseAuthorization();
             app.MapControllers();
 
-            await DbSeeder.SeedAsync(app.Services);
+            if (app.Environment.IsDevelopment())
+            {
+                await DbSeeder.SeedAsync(app.Services);
+            }
+
             app.Run();
         }
     }

@@ -174,6 +174,68 @@ namespace BookingSystem.Api.Tests
         }
 
         [Fact]
+        public async Task CreateBookingAsync_ShouldReturn201_WhenOverlappingBookingIsCancelled()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+            var user = CreateUser();
+
+            var resource = new Resource
+            {
+                Id = 1,
+                Name = "Meeting Room",
+                Description = "Test room",
+                Location = "Test Building",
+                Capacity = 4,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var cancelledBooking = new Booking
+            {
+                Id = 1,
+                UserId = 1,
+                ResourceId = 1,
+                StartTime = DateTime.UtcNow.AddHours(2),
+                EndTime = DateTime.UtcNow.AddHours(4),
+                Status = BookingStatus.Cancelled,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            context.Users.Add(user);
+            context.Resources.Add(resource);
+            context.Bookings.Add(cancelledBooking);
+
+            await context.SaveChangesAsync();
+
+            var service = new BookingService(context);
+
+            var dto = new DTOs.Booking.CreateBookingDto
+            {
+                ResourceId = 1,
+                StartTime = DateTime.UtcNow.AddHours(3),
+                EndTime = DateTime.UtcNow.AddHours(5),
+                Notes = "Booking overlapping a cancelled booking"
+            };
+
+            // Act
+            var result = await service.CreateBookingAsync(
+                dto,
+                currentUserId: 1,
+                isAdmin: false
+            );
+
+            // Assert
+            Assert.True(result.Success);
+            Assert.Equal(201, result.StatusCode);
+            Assert.Null(result.Error);
+
+            Assert.NotNull(result.Data);
+            Assert.Equal(1, result.Data!.ResourceId);
+            Assert.Equal(BookingStatus.Active, result.Data.Status);
+        }
+
+        [Fact]
         public async Task CreateBookingAsync_ShouldReturn400_WhenStartTimeIsAfterEndTime()
         {
             // Arrange

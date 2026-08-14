@@ -197,6 +197,7 @@ namespace BookingSystem.Api.Services.Bookings
             // Checks for overlapping bookings on the same resource
             var hasOverlap = await _context.Bookings.AnyAsync(b =>
                 b.ResourceId == dto.ResourceId &&
+                b.Status != BookingStatus.Cancelled &&
                 dto.StartTime < b.EndTime &&
                 dto.EndTime > b.StartTime);
 
@@ -286,6 +287,7 @@ namespace BookingSystem.Api.Services.Bookings
             var hasOverlap = await _context.Bookings.AnyAsync(b =>
                 b.Id != id &&
                 b.ResourceId == dto.ResourceId &&
+                b.Status != BookingStatus.Cancelled &&
                 dto.StartTime < b.EndTime &&
                 dto.EndTime > b.StartTime);
 
