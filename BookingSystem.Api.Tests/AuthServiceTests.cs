@@ -94,6 +94,39 @@ namespace BookingSystem.Api.Tests
         }
 
         [Fact]
+        public async Task RegisterAsync_ShouldTrimAndNormalizeEmail()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+            var configuration = CreateConfiguration();
+            var role = CreateRole();
+
+            context.Roles.Add(role);
+            await context.SaveChangesAsync();
+
+            var service = new AuthService(context, configuration);
+
+            var dto = new DTOs.Auth.RegisterDto
+            {
+                FirstName = "Test",
+                LastName = "User",
+                Email = "  Test@Example.com  ",
+                Password = "Password123!"
+            };
+
+            // Act
+            var result = await service.RegisterAsync(dto);
+
+            // Assert
+            Assert.True(result.Success);
+
+            var savedUser = await context.Users.SingleAsync();
+
+            Assert.Equal("Test@Example.com", savedUser.Email);
+            Assert.Equal("TEST@EXAMPLE.COM", savedUser.NormalizedEmail);
+        }
+
+        [Fact]
         public async Task RegisterAsync_ShouldReturn409_WhenEmailAlreadyExists()
         {
             // Arrange
@@ -114,6 +147,40 @@ namespace BookingSystem.Api.Tests
                 FirstName = "New",
                 LastName = "User",
                 Email = "test@example.com",
+                Password = "Password123!"
+            };
+
+            // Act
+            var result = await service.RegisterAsync(dto);
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.Equal(409, result.StatusCode);
+            Assert.Equal("Email is already in use.", result.Error);
+            Assert.Null(result.Data);
+        }
+
+        [Fact]
+        public async Task RegisterAsync_ShouldReturn409_WhenEmailDiffersOnlyByCaseAndWhitespace()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+            var configuration = CreateConfiguration();
+            var role = CreateRole();
+            var existingUser = CreateUser(email: "test@example.com");
+
+            context.Roles.Add(role);
+            context.Users.Add(existingUser);
+
+            await context.SaveChangesAsync();
+
+            var service = new AuthService(context, configuration);
+
+            var dto = new DTOs.Auth.RegisterDto
+            {
+                FirstName = "New",
+                LastName = "User",
+                Email = "  TEST@EXAMPLE.COM  ",
                 Password = "Password123!"
             };
 
@@ -213,6 +280,50 @@ namespace BookingSystem.Api.Tests
         }
 
         [Fact]
+        public async Task LoginAsync_ShouldReturnToken_WhenEmailDiffersOnlyByCaseAndWhitespace()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+            var configuration = CreateConfiguration();
+            var role = CreateRole();
+
+            context.Roles.Add(role);
+            await context.SaveChangesAsync();
+
+            var service = new AuthService(context, configuration);
+
+            const string password = "CorrectPassword123!";
+
+            var registerDto = new DTOs.Auth.RegisterDto
+            {
+                FirstName = "Test",
+                LastName = "User",
+                Email = "test@example.com",
+                Password = password
+            };
+
+            var registerResult = await service.RegisterAsync(registerDto);
+
+            Assert.True(registerResult.Success, registerResult.Error);
+
+            var loginDto = new DTOs.Auth.LoginDto
+            {
+                Email = "  TEST@EXAMPLE.COM  ",
+                Password = password
+            };
+
+            // Act
+            var result = await service.LoginAsync(loginDto);
+
+            // Assert
+            Assert.True(result.Success, result.Error);
+            Assert.Equal(200, result.StatusCode);
+            Assert.Null(result.Error);
+            Assert.NotNull(result.Token);
+            Assert.False(string.IsNullOrWhiteSpace(result.Token));
+        }
+
+        [Fact]
         public async Task LoginAsync_ShouldReturn401_WhenEmailDoesNotExist()
         {
             // Arrange
@@ -258,7 +369,8 @@ namespace BookingSystem.Api.Tests
                 Id = id,
                 FirstName = "John",
                 LastName = "Doe",
-                Email = email,
+                Email = email.Trim(),
+                NormalizedEmail = email.Trim().ToUpperInvariant(),
                 PasswordHash = passwordHash,
                 RoleId = roleId,
                 CreatedAt = DateTime.UtcNow

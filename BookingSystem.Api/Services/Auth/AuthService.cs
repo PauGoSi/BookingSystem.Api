@@ -45,7 +45,11 @@ namespace BookingSystem.Api.Services.Auth
                 return (false, "Password is required.", 400, null);
             }
 
-            var emailExists = await _context.Users.AnyAsync(u => u.Email == dto.Email);
+            var normalizedEmail = NormalizeEmail(dto.Email);
+
+            var emailExists = await _context.Users
+                .AnyAsync(u => u.NormalizedEmail == normalizedEmail);
+
             if (emailExists)
             {
                 return (false, "Email is already in use.", 409, null);
@@ -55,7 +59,8 @@ namespace BookingSystem.Api.Services.Auth
             {
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
-                Email = dto.Email,
+                Email = dto.Email.Trim(),
+                NormalizedEmail = normalizedEmail,
                 CreatedAt = DateTime.UtcNow,
                 PasswordHash = string.Empty,
                 RoleId = userRole.Id
@@ -81,9 +86,11 @@ namespace BookingSystem.Api.Services.Auth
         // Authenticates a user by validating email and password
         public async Task<(bool Success, string? Error, int StatusCode, string? Token)> LoginAsync(LoginDto dto)
         {
+            var normalizedEmail = NormalizeEmail(dto.Email);
+
             var user = await _context.Users
                 .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Email == dto.Email);
+                .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
 
             if (user == null)
             {
@@ -101,6 +108,11 @@ namespace BookingSystem.Api.Services.Auth
             var token = GenerateJwtToken(user);
 
             return (true, null, 200, token);
+        }
+
+        private static string NormalizeEmail(string email)
+        {
+            return email.Trim().ToUpperInvariant();
         }
 
         // Generates a JWT token for an authenticated user

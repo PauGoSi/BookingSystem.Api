@@ -886,12 +886,15 @@ namespace BookingSystem.Api.Tests
             int id = 1,
             int roleId = 1)
         {
+            var normalizedEmail = email.Trim().ToUpperInvariant();
+
             return new User
             {
                 Id = id,
                 FirstName = "John",
                 LastName = "Doe",
-                Email = email,
+                Email = email.Trim(),
+                NormalizedEmail = normalizedEmail,
                 PasswordHash = passwordHash,
                 RoleId = roleId,
                 CreatedAt = DateTime.UtcNow

@@ -150,6 +150,94 @@ namespace BookingSystem.Api.Tests
             Assert.Equal("Email is already in use.", result.Error);
         }
 
+        [Fact]
+        public async Task UpdateUserAsync_ShouldNormalizeEmail_WhenEmailIsUpdated()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+            var role = CreateRole();
+            var user = CreateUser(email: "old@example.com");
+
+            context.Roles.Add(role);
+            context.Users.Add(user);
+
+            await context.SaveChangesAsync();
+
+            var service = new UserService(context);
+
+            var dto = new DTOs.User.UpdateUserDto
+            {
+                FirstName = "John",
+                LastName = "Doe",
+                Email = "  New.Email@Example.COM  ",
+                RoleId = 1
+            };
+
+            // Act
+            var result = await service.UpdateUserAsync(
+                id: 1,
+                dto: dto
+            );
+
+            // Assert
+            Assert.True(result.Success);
+            Assert.Equal(204, result.StatusCode);
+
+            var updatedUser = await context.Users.FindAsync(1);
+
+            Assert.NotNull(updatedUser);
+            Assert.Equal("New.Email@Example.COM", updatedUser!.Email);
+            Assert.Equal("NEW.EMAIL@EXAMPLE.COM", updatedUser.NormalizedEmail);
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldReturn409_WhenNormalizedEmailAlreadyExists()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+            var role = CreateRole();
+
+            var user1 = CreateUser(
+                id: 1,
+                email: "john@example.com");
+
+            var user2 = CreateUser(
+                id: 2,
+                email: "jane@example.com");
+
+            context.Roles.Add(role);
+            context.Users.AddRange(user1, user2);
+
+            await context.SaveChangesAsync();
+
+            var service = new UserService(context);
+
+            var dto = new DTOs.User.UpdateUserDto
+            {
+                FirstName = "Jane",
+                LastName = "Doe",
+                Email = "  JOHN@EXAMPLE.COM  ",
+                RoleId = 1
+            };
+
+            // Act
+            var result = await service.UpdateUserAsync(
+                id: 2,
+                dto: dto
+            );
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.Equal(409, result.StatusCode);
+            Assert.Equal("Email is already in use.", result.Error);
+
+            var unchangedUser = await context.Users.FindAsync(2);
+
+            Assert.NotNull(unchangedUser);
+            Assert.Equal("jane@example.com", unchangedUser!.Email);
+            Assert.Equal("JANE@EXAMPLE.COM", unchangedUser.NormalizedEmail);
+        }
+
         // DeleteUserAsync tests
         [Fact]
         public async Task DeleteUserAsync_ShouldReturn404_WhenUserDoesNotExist()
@@ -258,12 +346,15 @@ namespace BookingSystem.Api.Tests
             int id = 1,
             int roleId = 1)
         {
+            var normalizedEmail = email.Trim().ToUpperInvariant();
+
             return new User
             {
                 Id = id,
                 FirstName = "John",
                 LastName = "Doe",
-                Email = email,
+                Email = email.Trim(),
+                NormalizedEmail = normalizedEmail,
                 PasswordHash = passwordHash,
                 RoleId = roleId,
                 CreatedAt = DateTime.UtcNow

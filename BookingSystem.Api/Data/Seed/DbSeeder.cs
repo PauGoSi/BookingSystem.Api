@@ -47,12 +47,14 @@ namespace BookingSystem.Api.Data.Seed
             var adminEmail = configuration["DevelopmentAdmin:Email"]
                 ?? "admin@bookingsystem.local";
 
+            var normalizedAdminEmail = adminEmail.Trim().ToUpperInvariant();
+
             var adminPassword = configuration["DevelopmentAdmin:Password"]
                 ?? throw new InvalidOperationException(
                     "Development admin password is not configured.");
 
             var adminUser = await context.Users
-                .FirstOrDefaultAsync(u => u.Email == adminEmail);
+                .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedAdminEmail);
 
             if (adminUser == null)
             {
@@ -60,7 +62,8 @@ namespace BookingSystem.Api.Data.Seed
                 {
                     FirstName = "Development",
                     LastName = "Admin",
-                    Email = adminEmail,
+                    Email = adminEmail.Trim(),
+                    NormalizedEmail = normalizedAdminEmail,
                     RoleId = adminRole.Id,
                     CreatedAt = DateTime.UtcNow,
                     PasswordHash = string.Empty

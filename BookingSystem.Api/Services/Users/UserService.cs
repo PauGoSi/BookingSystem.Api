@@ -67,7 +67,11 @@ namespace BookingSystem.Api.Services.Users
                 return (false, "Email is required.", 400, null);
             }
 
-            var emailExists = await _context.Users.AnyAsync(u => u.Email == dto.Email);
+            var normalizedEmail = NormalizeEmail(dto.Email);
+
+            var emailExists = await _context.Users
+                .AnyAsync(u => u.NormalizedEmail == normalizedEmail);
+
             if (emailExists)
             {
                 return (false, "Email is already in use.", 409, null);
@@ -88,7 +92,8 @@ namespace BookingSystem.Api.Services.Users
             {
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
-                Email = dto.Email,
+                Email = dto.Email.Trim(),
+                NormalizedEmail = normalizedEmail,
                 PasswordHash = string.Empty,
                 RoleId = dto.RoleId,
                 CreatedAt = DateTime.UtcNow
@@ -136,9 +141,11 @@ namespace BookingSystem.Api.Services.Users
                 return (false, "Email is required.", 400);
             }
 
+            var normalizedEmail = NormalizeEmail(dto.Email);
+
             var emailExists = await _context.Users.AnyAsync(u =>
                 u.Id != id &&
-                u.Email == dto.Email);
+                u.NormalizedEmail == normalizedEmail);
 
             if (emailExists)
             {
@@ -153,7 +160,8 @@ namespace BookingSystem.Api.Services.Users
 
             user.FirstName = dto.FirstName;
             user.LastName = dto.LastName;
-            user.Email = dto.Email;
+            user.Email = dto.Email.Trim();
+            user.NormalizedEmail = normalizedEmail;
             user.RoleId = dto.RoleId;
 
             await _context.SaveChangesAsync();
@@ -182,6 +190,11 @@ namespace BookingSystem.Api.Services.Users
             await _context.SaveChangesAsync();
 
             return (true, null, 204);
+        }
+
+        private static string NormalizeEmail(string email)
+        {
+            return email.Trim().ToUpperInvariant();
         }
     }
 }
