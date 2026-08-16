@@ -2,6 +2,7 @@
 using BookingSystem.Api.Models;
 using BookingSystem.Api.Services.Users;
 using Microsoft.EntityFrameworkCore;
+using BookingSystem.Api.Enums;
 
 namespace BookingSystem.Api.Tests
 {
@@ -29,7 +30,7 @@ namespace BookingSystem.Api.Tests
                 LastName = "User",
                 Email = "test@example.com",
                 Password = "Password123!",
-                RoleId = 1
+                Role = SystemRole.User
             };
 
             // Act
@@ -62,7 +63,7 @@ namespace BookingSystem.Api.Tests
                 LastName = "Doe",
                 Email = "john@example.com",
                 Password = "Password123!",
-                RoleId = 1
+                Role = SystemRole.User
             };
 
             // Act
@@ -76,7 +77,7 @@ namespace BookingSystem.Api.Tests
             Assert.Equal("John", result.Data.FirstName);
             Assert.Equal("Doe", result.Data.LastName);
             Assert.Equal("john@example.com", result.Data.Email);
-            Assert.Equal(1, result.Data.RoleId);
+            Assert.Equal(SystemRole.User, result.Data.Role);
 
             var createdUser = await context.Users.FirstAsync();
 
@@ -98,7 +99,7 @@ namespace BookingSystem.Api.Tests
                 FirstName = "Updated",
                 LastName = "User",
                 Email = "updated@example.com",
-                RoleId = 1
+                Role = SystemRole.User
             };
 
             // Act
@@ -135,7 +136,7 @@ namespace BookingSystem.Api.Tests
                 FirstName = "Updated",
                 LastName = "User",
                 Email = "john@example.com",
-                RoleId = 1
+                Role = SystemRole.User
             };
 
             // Act
@@ -170,7 +171,7 @@ namespace BookingSystem.Api.Tests
                 FirstName = "John",
                 LastName = "Doe",
                 Email = "  New.Email@Example.COM  ",
-                RoleId = 1
+                Role = SystemRole.User
             };
 
             // Act
@@ -217,7 +218,7 @@ namespace BookingSystem.Api.Tests
                 FirstName = "Jane",
                 LastName = "Doe",
                 Email = "  JOHN@EXAMPLE.COM  ",
-                RoleId = 1
+                Role = SystemRole.User
             };
 
             // Act

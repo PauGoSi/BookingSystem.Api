@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BookingSystem.Api.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace BookingSystem.Api.DTOs.User
 {
@@ -17,7 +18,6 @@ namespace BookingSystem.Api.DTOs.User
         [StringLength(254)]
         public string Email { get; set; } = null!;
 
-        [Range(1, int.MaxValue)]
-        public int RoleId { get; set; }
+        public SystemRole Role { get; set; }
     }
 }

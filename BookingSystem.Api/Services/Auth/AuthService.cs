@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using BookingSystem.Api.Enums;
 
 namespace BookingSystem.Api.Services.Auth
 {
@@ -77,7 +78,7 @@ namespace BookingSystem.Api.Services.Auth
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
-                RoleId = user.RoleId
+                Role = SystemRole.User
             };
 
             return (true, null, 201, result);

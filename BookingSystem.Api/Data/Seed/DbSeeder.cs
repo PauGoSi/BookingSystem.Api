@@ -74,6 +74,21 @@ namespace BookingSystem.Api.Data.Seed
                 context.Users.Add(adminUser);
                 await context.SaveChangesAsync();
             }
+            else
+            {
+                var passwordVerification = passwordHasher.VerifyHashedPassword(
+                    adminUser,
+                    adminUser.PasswordHash,
+                    adminPassword);
+
+                if (passwordVerification == PasswordVerificationResult.Failed)
+                {
+                    adminUser.PasswordHash =
+                        passwordHasher.HashPassword(adminUser, adminPassword);
+
+                    await context.SaveChangesAsync();
+                }
+            }
         }
     }
 }

@@ -39,51 +39,5 @@ namespace BookingSystem.Api.Controllers
 
             return Ok(role);
         }
-
-        // Creates a new role
-        [HttpPost]
-        public async Task<ActionResult<RoleDto>> CreateRole(CreateRoleDto dto)
-        {
-            var result = await _roleService.CreateRoleAsync(dto);
-
-            if (!result.Success)
-            {
-                return StatusCode(result.StatusCode, new { error = result.Error });
-            }
-
-            return CreatedAtAction(
-                nameof(GetRoleById),
-                new { id = result.Data!.Id },
-                result.Data
-            );
-        }
-
-        // Updates an existing role
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateRole([FromRoute] int id, UpdateRoleDto dto)
-        {
-            var result = await _roleService.UpdateRoleAsync(id, dto);
-
-            if (!result.Success)
-            {
-                return StatusCode(result.StatusCode, new { error = result.Error });
-            }
-
-            return NoContent();
-        }
-
-        // Deletes a role
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteRole([FromRoute] int id)
-        {
-            var result = await _roleService.DeleteRoleAsync(id);
-
-            if (!result.Success)
-            {
-                return StatusCode(result.StatusCode, new { error = result.Error });
-            }
-
-            return NoContent();
-        }
     }
 }

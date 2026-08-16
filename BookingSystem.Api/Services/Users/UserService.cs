@@ -1,8 +1,9 @@
 ﻿using BookingSystem.Api.Data;
 using BookingSystem.Api.DTOs.User;
+using BookingSystem.Api.Enums;
 using BookingSystem.Api.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookingSystem.Api.Services.Users
 {
@@ -28,7 +29,9 @@ namespace BookingSystem.Api.Services.Users
                     FirstName = u.FirstName,
                     LastName = u.LastName,
                     Email = u.Email,
-                    RoleId = u.RoleId
+                    Role = u.Role.Name == "Admin"
+                        ? SystemRole.Admin
+                        : SystemRole.User
                 })
                 .ToListAsync();
         }
@@ -44,7 +47,9 @@ namespace BookingSystem.Api.Services.Users
                     FirstName = u.FirstName,
                     LastName = u.LastName,
                     Email = u.Email,
-                    RoleId = u.RoleId
+                    Role = u.Role.Name == "Admin"
+                        ? SystemRole.Admin
+                        : SystemRole.User
                 })
                 .FirstOrDefaultAsync();
         }
@@ -82,10 +87,14 @@ namespace BookingSystem.Api.Services.Users
                 return (false, "Password is required.", 400, null);
             }
 
-            var roleExists = await _context.Roles.AnyAsync(r => r.Id == dto.RoleId);
-            if (!roleExists)
+            var roleName = dto.Role.ToString();
+
+            var role = await _context.Roles
+                .FirstOrDefaultAsync(r => r.Name == roleName);
+
+            if (role == null)
             {
-                return (false, "Role not found.", 404, null);
+                return (false, "Role not found.", 500, null);
             }
 
             var user = new User
@@ -95,7 +104,7 @@ namespace BookingSystem.Api.Services.Users
                 Email = dto.Email.Trim(),
                 NormalizedEmail = normalizedEmail,
                 PasswordHash = string.Empty,
-                RoleId = dto.RoleId,
+                RoleId = role.Id,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -110,7 +119,7 @@ namespace BookingSystem.Api.Services.Users
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
-                RoleId = user.RoleId
+                Role = dto.Role
             };
 
             return (true, null, 201, result);
@@ -152,17 +161,21 @@ namespace BookingSystem.Api.Services.Users
                 return (false, "Email is already in use.", 409);
             }
 
-            var roleExists = await _context.Roles.AnyAsync(r => r.Id == dto.RoleId);
-            if (!roleExists)
+            var roleName = dto.Role.ToString();
+
+            var role = await _context.Roles
+                .FirstOrDefaultAsync(r => r.Name == roleName);
+
+            if (role == null)
             {
-                return (false, "Role not found.", 404);
+                return (false, "Role not found.", 500);
             }
 
             user.FirstName = dto.FirstName;
             user.LastName = dto.LastName;
             user.Email = dto.Email.Trim();
             user.NormalizedEmail = normalizedEmail;
-            user.RoleId = dto.RoleId;
+            user.RoleId = role.Id;
 
             await _context.SaveChangesAsync();
 

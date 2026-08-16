@@ -22,7 +22,8 @@ The project demonstrates modern backend practices including layered architecture
 
 - Booking management with conflict detection (no overlapping bookings)
 - Clean layered architecture (Controllers, Services, DTOs)
-- CRUD operations for bookings, users, roles, and resources
+- CRUD operations for bookings, users, and resources
+- Read-only access to the built-in `Admin` and `User` system roles
 - Booking status lifecycle (`Active`, `Cancelled`, `Completed`)
 - Background service for automatic booking status updates
 - Validation rules to ensure data integrity
@@ -123,15 +124,25 @@ The admin email defaults to:
 ```text
 admin@bookingsystem.local
 ```
-The development admin password is not stored in the repository. Configure it locally using .NET User Secrets:
+The development admin password is not stored in the repository.
 
+Before running the application for the first time, navigate to the API project directory:
+```bash
+cd .\BookingSystem.Api\
+```
+Configure a local development admin password using .NET User Secrets:
 ```bash
 dotnet user-secrets set "DevelopmentAdmin:Password" "YOUR_DEVELOPMENT_PASSWORD"
+```
+The configured local secrets can be verified using:
+```bash
+dotnet user-secrets list
 ```
 The admin email can optionally be overridden using:
 ```bash
 dotnet user-secrets set "DevelopmentAdmin:Email" "YOUR_ADMIN_EMAIL"
 ```
+.NET User Secrets are stored locally and are not committed to or downloaded from the Git repository.
 The development admin account is seeded only when the application runs in the Development environment.
 
 ## Security Notes
@@ -240,10 +251,13 @@ Using string values (e.g. `Completed`) is recommended for better readability and
 ### Roles
 
 - `GET /api/roles`
-- `POST /api/roles`
 - `GET /api/roles/{id}`
-- `PUT /api/roles/{id}`
-- `DELETE /api/roles/{id}`
+
+`Admin` and `User` are built-in system roles created during Development seeding. Role creation, modification, and deletion are intentionally not supported.
+
+User creation and updates use the `role` field with the supported values `"Admin"` and `"User"` instead of exposing database role IDs. User responses likewise expose the role name rather than the internal `RoleId`.
+
+Self-registered users are always assigned the `User` role.
 
 ### Resources
 
@@ -292,11 +306,6 @@ The following rules apply:
    - The provided `BookingId` must exist in the system
    - Returns `404 Not Found` if booking does not exist
 
-8. **The requested role to be deleted has no users**
-   - The provided `RoleId` to be deleted must not have any users
-   - Returns `409 Conflict` if users are detected
-   - The database relationship also uses restricted delete behavior
-
 9. **The requested user to be deleted has no bookings**
    - The provided `UserId` to be deleted must not have any bookings
    - Returns `409 Conflict` if bookings are detected
@@ -314,10 +323,6 @@ The following rules apply:
 12. **The requested resource to be booked must be Active**
     - The resource must have `IsActive = true`
     - Returns `400 Bad Request` if inactive
-
-13. **The requested role name to be created should not already be in use**
-    - A newly created role must have a unique name
-    - Returns `409 Conflict` if a role name already exists in the system
 
 14. **A booking cannot be cancelled more than once**
     - The specified `BookingId` must not already have the status `Cancelled`
@@ -402,19 +407,16 @@ For deleting an existing user (`DELETE /api/users`):
 
 ---
 
-**Successful Role**
+**System Roles**
 
-For creating a role (`POST /api/roles`):
-- If validation 13. passes, the role is created successfully
-- Returns `201 Created` with the created role
+The application uses two built-in roles:
 
-For updating an existing role (`PUT /api/roles`):
-- If validations 3. and 13. pass, the existing role is updated successfully
-- Returns `204 No Content`
+- `Admin`
+- `User`
 
-For deleting an existing role (`DELETE /api/roles`):
-- If validations 3. and 8. pass, the existing role is deleted successfully
-- Returns `204 No Content`
+These roles are created automatically during Development seeding if they do not already exist.
+
+Roles are intentionally read-only through the API. The API does not expose endpoints for creating, renaming, or deleting roles because the authorization model is designed around these two fixed system roles.
 
 ---
 
@@ -552,7 +554,9 @@ Only admins can:
 
 ## User & Role Management
 
-User and role management endpoints are restricted to admins only.
+User management endpoints are restricted to admins only.
+
+The authorization model uses two fixed system roles, `Admin` and `User`. Roles can be viewed by admins but cannot be created, renamed, or deleted through the API.
 
 ## Security
 
