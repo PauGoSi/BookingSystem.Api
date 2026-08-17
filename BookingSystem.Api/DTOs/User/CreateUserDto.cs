@@ -23,6 +23,6 @@ namespace BookingSystem.Api.DTOs.User
         [StringLength(100)]
         public string Password { get; set; } = null!;
 
-        public SystemRole Role { get; set; }
+        public string Role { get; set; } = null!;
     }
 }

@@ -87,7 +87,17 @@ namespace BookingSystem.Api.Services.Users
                 return (false, "Password is required.", 400, null);
             }
 
-            var roleName = dto.Role.ToString();
+            if (string.IsNullOrWhiteSpace(dto.Role))
+            {
+                return (false, "Role is required.", 400, null);
+            }
+
+            var roleName = dto.Role.Trim();
+
+            if (roleName != "Admin" && roleName != "User")
+            {
+                return (false, "Role must be either 'Admin' or 'User'.", 400, null);
+            }
 
             var role = await _context.Roles
                 .FirstOrDefaultAsync(r => r.Name == roleName);
@@ -119,7 +129,7 @@ namespace BookingSystem.Api.Services.Users
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
-                Role = dto.Role
+                Role = Enum.Parse<SystemRole>(roleName)
             };
 
             return (true, null, 201, result);
@@ -161,7 +171,17 @@ namespace BookingSystem.Api.Services.Users
                 return (false, "Email is already in use.", 409);
             }
 
-            var roleName = dto.Role.ToString();
+            if (string.IsNullOrWhiteSpace(dto.Role))
+            {
+                return (false, "Role is required.", 400);
+            }
+
+            var roleName = dto.Role.Trim();
+
+            if (roleName != "Admin" && roleName != "User")
+            {
+                return (false, "Role must be either 'Admin' or 'User'.", 400);
+            }
 
             var role = await _context.Roles
                 .FirstOrDefaultAsync(r => r.Name == roleName);

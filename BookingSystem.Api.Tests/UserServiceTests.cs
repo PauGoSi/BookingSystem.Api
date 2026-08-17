@@ -30,7 +30,7 @@ namespace BookingSystem.Api.Tests
                 LastName = "User",
                 Email = "test@example.com",
                 Password = "Password123!",
-                Role = SystemRole.User
+                Role = "User"
             };
 
             // Act
@@ -63,7 +63,7 @@ namespace BookingSystem.Api.Tests
                 LastName = "Doe",
                 Email = "john@example.com",
                 Password = "Password123!",
-                Role = SystemRole.User
+                Role = "User"
             };
 
             // Act
@@ -85,6 +85,51 @@ namespace BookingSystem.Api.Tests
             Assert.False(string.IsNullOrWhiteSpace(createdUser.PasswordHash));
         }
 
+        [Fact]
+        public async Task CreateUserAsync_ShouldReturn400_WhenRoleIsInvalid()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+
+            context.Roles.AddRange(
+                new Role
+                {
+                    Id = 1,
+                    Name = "Admin"
+                },
+                new Role
+                {
+                    Id = 2,
+                    Name = "User"
+                });
+
+            await context.SaveChangesAsync();
+
+            var service = new UserService(context);
+
+            var dto = new DTOs.User.CreateUserDto
+            {
+                FirstName = "John",
+                LastName = "Doe",
+                Email = "john@example.com",
+                Password = "Password123!",
+                Role = "My User"
+            };
+
+            // Act
+            var result = await service.CreateUserAsync(dto);
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.Equal(400, result.StatusCode);
+            Assert.Equal(
+                "Role must be either 'Admin' or 'User'.",
+                result.Error);
+            Assert.Null(result.Data);
+
+            Assert.Equal(0, await context.Users.CountAsync());
+        }
+
         // UpdateUserAsync tests
         [Fact]
         public async Task UpdateUserAsync_ShouldReturn404_WhenUserDoesNotExist()
@@ -99,7 +144,7 @@ namespace BookingSystem.Api.Tests
                 FirstName = "Updated",
                 LastName = "User",
                 Email = "updated@example.com",
-                Role = SystemRole.User
+                Role = "User"
             };
 
             // Act
@@ -136,7 +181,7 @@ namespace BookingSystem.Api.Tests
                 FirstName = "Updated",
                 LastName = "User",
                 Email = "john@example.com",
-                Role = SystemRole.User
+                Role = "User"
             };
 
             // Act
@@ -171,7 +216,7 @@ namespace BookingSystem.Api.Tests
                 FirstName = "John",
                 LastName = "Doe",
                 Email = "  New.Email@Example.COM  ",
-                Role = SystemRole.User
+                Role = "User"
             };
 
             // Act
@@ -218,7 +263,7 @@ namespace BookingSystem.Api.Tests
                 FirstName = "Jane",
                 LastName = "Doe",
                 Email = "  JOHN@EXAMPLE.COM  ",
-                Role = SystemRole.User
+                Role = "User"
             };
 
             // Act
@@ -237,6 +282,55 @@ namespace BookingSystem.Api.Tests
             Assert.NotNull(unchangedUser);
             Assert.Equal("jane@example.com", unchangedUser!.Email);
             Assert.Equal("JANE@EXAMPLE.COM", unchangedUser.NormalizedEmail);
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldReturn400_WhenRoleIsInvalid()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+
+            var role = CreateRole();
+
+            var user = CreateUser(
+                id: 1,
+                email: "john@example.com",
+                roleId: 1);
+
+            context.Roles.Add(role);
+            context.Users.Add(user);
+
+            await context.SaveChangesAsync();
+
+            var service = new UserService(context);
+
+            var dto = new DTOs.User.UpdateUserDto
+            {
+                FirstName = "Updated",
+                LastName = "User",
+                Email = "updated@example.com",
+                Role = "My User"
+            };
+
+            // Act
+            var result = await service.UpdateUserAsync(
+                id: 1,
+                dto: dto);
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.Equal(400, result.StatusCode);
+            Assert.Equal(
+                "Role must be either 'Admin' or 'User'.",
+                result.Error);
+
+            var unchangedUser = await context.Users.FindAsync(1);
+
+            Assert.NotNull(unchangedUser);
+            Assert.Equal("John", unchangedUser!.FirstName);
+            Assert.Equal("Doe", unchangedUser.LastName);
+            Assert.Equal("john@example.com", unchangedUser.Email);
+            Assert.Equal(1, unchangedUser.RoleId);
         }
 
         // DeleteUserAsync tests
