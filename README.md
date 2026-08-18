@@ -531,6 +531,148 @@ admin@bookingsystem.local
 
 and the password configured as `DEVELOPMENT_ADMIN_PASSWORD` in `.env`.
 
+## Quick Start Without Docker
+
+If you prefer to run the application directly without Docker, you need:
+
+- .NET 10 SDK
+- SQL Server or SQL Server LocalDB
+- Git (optional if the repository is downloaded as a ZIP)
+
+Visual Studio is not required.
+
+### 1. Get the source code
+
+Using Git:
+
+```bash
+git clone https://github.com/PauGoSi/BookingSystem.Api.git
+cd BookingSystem.Api
+```
+
+Alternatively, download the repository as a ZIP from GitHub and extract it locally.
+
+### 2. Configure local development secrets
+
+Navigate to the ASP.NET Core API project:
+
+#### Windows PowerShell
+
+```powershell
+cd .\BookingSystem.Api\
+```
+
+#### Linux / macOS
+
+```bash
+cd ./BookingSystem.Api/
+```
+
+Configure a JWT signing key:
+
+```bash
+dotnet user-secrets set "Jwt:Key" "YOUR_LONG_RANDOM_JWT_SIGNING_KEY"
+```
+
+Configure the Development admin password:
+
+```bash
+dotnet user-secrets set "DevelopmentAdmin:Password" "YOUR_DEVELOPMENT_ADMIN_PASSWORD"
+```
+
+You can optionally override the default admin email:
+
+```bash
+dotnet user-secrets set "DevelopmentAdmin:Email" "YOUR_ADMIN_EMAIL"
+```
+
+Verify the configured secrets:
+
+```bash
+dotnet user-secrets list
+```
+
+.NET User Secrets are stored only on the local machine and are not committed to the repository.
+
+### 3. Configure SQL Server
+
+By default, the application uses SQL Server LocalDB:
+
+```text
+Server=(localdb)\MSSQLLocalDB;Database=BookingDb;Trusted_Connection=True;TrustServerCertificate=True;
+```
+
+If SQL Server LocalDB is available, no connection string change is required.
+
+If you use another SQL Server instance, configure the connection string as a local User Secret:
+
+```bash
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "YOUR_SQL_SERVER_CONNECTION_STRING"
+```
+
+### 4. Restore dependencies
+
+Return to the repository root:
+
+#### Windows PowerShell
+
+```powershell
+cd ..
+```
+
+#### Linux / macOS
+
+```bash
+cd ..
+```
+
+Then run:
+
+```bash
+dotnet restore
+```
+
+### 5. Run the application
+
+```bash
+dotnet run --project BookingSystem.Api
+```
+
+When running in the Development environment, the application automatically:
+
+- applies pending Entity Framework Core migrations
+- creates the built-in `Admin` and `User` roles if missing
+- creates the Development admin user if missing
+
+Swagger is available at the local URL shown in the terminal, typically:
+
+```text
+https://localhost:7223/swagger
+```
+
+The exact port may vary depending on the local development configuration.
+
+### 6. Log in
+
+Use:
+
+```text
+POST /api/auth/login
+```
+
+with:
+
+```json
+{
+  "email": "admin@bookingsystem.local",
+  "password": "YOUR_DEVELOPMENT_ADMIN_PASSWORD"
+}
+```
+
+If `DevelopmentAdmin:Email` was overridden, use that email instead.
+
+A successful login returns a JWT token that can be used with protected API endpoints.
+
 ## Purpose
 
 This project was created as a portfolio project to demonstrate practical backend development with ASP.NET Core, including:
