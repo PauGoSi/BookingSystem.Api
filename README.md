@@ -1,209 +1,83 @@
-# BookingSystem API
+# BookingSystem.Api
 
-This project demonstrates a production-like ASP.NET Core API with authentication, authorization, background jobs, database constraints, and business rules.
+A RESTful booking system built with ASP.NET Core Web API.
 
-A RESTful API built with ASP.NET Core for managing bookings, resources, users, and roles.
+The project demonstrates a production-oriented backend architecture with authentication, authorization, validation, Entity Framework Core, automated tests, CI, and Docker-based local development.
 
-## Overview
+## Features
 
-The project demonstrates modern backend practices including layered architecture, JWT authentication, role-based authorization, background processing, relational database constraints, automated testing, and clean API design.
-
-### Example Booking Flow
-
-```
-1. User creates a booking
-2. System validates time and availability
-3. Booking is stored with status `Active`
-4. Background service automatically updates expired bookings to `Completed`
-5. User or admin can cancel or complete bookings manually
-```
-
-## Key Features
-
-- Booking management with conflict detection (no overlapping bookings)
-- Clean layered architecture (Controllers, Services, DTOs)
-- CRUD operations for bookings, users, and resources
-- Read-only access to the built-in `Admin` and `User` system roles
-- Booking status lifecycle (`Active`, `Cancelled`, `Completed`)
-- Background service for automatic booking status updates
-- Validation rules to ensure data integrity
-- Database-level constraints for critical data integrity rules
-- Restricted delete behavior for related entities
-- Case-insensitive email uniqueness using normalized email addresses
-- Pagination and filtering support
+- ASP.NET Core Web API
+- Entity Framework Core
+- SQL Server
 - JWT authentication
-- Role-based authorization (RBAC)
-- Ownership validation
-- Global error handling
-- Clean API routes
-- Seed data for easy setup
-- Automated unit and relational database tests
+- Role-based authorization
+- CRUD operations for users, roles, resources, and bookings
+- Booking validation and conflict handling
+- Pagination and filtering
+- Global exception handling
+- Automatic booking completion using a background service
+- Swagger / OpenAPI documentation
+- xUnit tests
+- GitHub Actions CI
+- Docker and Docker Compose
 
-## Tech Stack
+## Technologies
 
 - .NET 10
-- ASP.NET Core Web API
-- Entity Framework Core **10.0.11**
-- SQL Server
-- SQLite (relational database constraint tests)
-- xUnit
-- Swagger / OpenAPI
+- ASP.NET Core
 - C#
+- Entity Framework Core
+- SQL Server
+- JWT Bearer Authentication
+- Swagger / OpenAPI
+- xUnit
+- Docker
+- Docker Compose
+- GitHub Actions
 
-## Getting Started
-
-### What happens on startup
-
-When running in the Development environment:
-
-- Pending database migrations are applied
-- Default `Admin` and `User` roles are created if missing
-- A development admin user is created if missing
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/PauGoSi/BookingSystem.Api
-cd BookingSystem.Api/
-```
-
-### 2. Apply database migrations
-
-```bash
-dotnet restore
-dotnet ef database update
-```
-
-### 3. Run the application
-
-```bash
-dotnet run
-```
-
-## API Documentation
-
-Swagger UI is available when running the application.
-
-Typically:
-
-```bash
-https://localhost:7223/swagger
-```
-
-Note: The port may vary depending on your local setup.
-
-## Authentication (JWT)
-
-### How authentication works
-
-1. User logs in via:
-
-```
-POST /api/auth/login
-```
-
-2. Copy the returned JWT token.
-3. Click the **Authorize** button in Swagger UI.
-4. A popup window will appear. Enter:
-
-```bash
-Bearer YOUR_TOKEN_HERE
-```
-
-5. Click the `Authorize` button in the popup window.
-6. Click Close to close the popup window.
-7. The user is now authenticated and can make requests until the JWT token expires after 60 minutes.
-8. Expired JWT tokens are rejected by the API. Users must log in again to obtain a new valid token.
-
-## Default Admin Login (Development)
-
-In the Development environment, a default admin user is created if it does not already exist.
-
-The admin email defaults to:
+## Project Structure
 
 ```text
-admin@bookingsystem.local
-```
-The development admin password is not stored in the repository.
+BookingSystem.Api/
+├── BackgroundServices/
+├── Controllers/
+├── Data/
+│   └── Seed/
+├── DTOs/
+│   ├── Auth/
+│   ├── Booking/
+│   ├── Resource/
+│   ├── Role/
+│   └── User/
+├── Enums/
+├── Middleware/
+├── Migrations/
+├── Models/
+├── Services/
+├── Dockerfile
+└── Program.cs
 
-Before running the application for the first time, navigate to the API project directory:
-```bash
-cd .\BookingSystem.Api\
-```
-Configure a local development admin password using .NET User Secrets:
-```bash
-dotnet user-secrets set "DevelopmentAdmin:Password" "YOUR_DEVELOPMENT_PASSWORD"
-```
-The configured local secrets can be verified using:
-```bash
-dotnet user-secrets list
-```
-The admin email can optionally be overridden using:
-```bash
-dotnet user-secrets set "DevelopmentAdmin:Email" "YOUR_ADMIN_EMAIL"
-```
-.NET User Secrets are stored locally and are not committed to or downloaded from the Git repository.
-The development admin account is seeded only when the application runs in the Development environment.
+BookingSystem.Api.Tests/
+└── ...
 
-## Security Notes
+.github/
+└── workflows/
+    └── ci.yml
 
-- JWT signing keys and development admin credentials are not stored in the repository
-- Local development secrets are managed using .NET User Secrets
-- Production environments should use an appropriate secret-management solution or environment variables
-- Passwords are hashed using ASP.NET Core Identity utilities
-- Email addresses are normalized before uniqueness checks
-- A unique database index on `NormalizedEmail` provides database-level protection against duplicate email addresses
-
-## Running Tests
-
-The solution includes a dedicated xUnit test project:
-
-- `BookingSystem.Api.Tests`
-
-### Test Stack
-
-- xUnit
-- Entity Framework Core InMemory Provider
-- Entity Framework Core SQLite Provider
-
-### Run Tests
-
-```bash
-dotnet test
+compose.yaml
+.env.example
+.dockerignore
+.gitignore
 ```
 
-The current test suite contains **43 automated tests** covering service-layer business logic and relational database constraints.
+## Main Entities
 
-### Notes
+The application contains four main domain entities:
 
-The required NuGet packages are already included in the test project and will automatically be restored when running:
-
-```bash
-dotnet restore
-```
-
-The EF Core InMemory provider is used for isolated service-layer tests.
-
-SQLite is used for relational database tests because, unlike the InMemory provider, it enforces relational concepts such as foreign keys and check constraints. This allows database-level constraints and restricted delete behavior to be tested without requiring a SQL Server instance.
-
-## Core Dependencies
-
-| Package | Purpose |
-|---|---|
-| `Microsoft.AspNetCore.Authentication.JwtBearer` | JWT Bearer authentication and token validation |
-| `Microsoft.EntityFrameworkCore.SqlServer` | SQL Server database provider for Entity Framework Core |
-| `Microsoft.EntityFrameworkCore.Tools` | EF Core migration and database tooling |
-| `Microsoft.EntityFrameworkCore.Design` | Design-time support for Entity Framework Core |
-| `Microsoft.EntityFrameworkCore.InMemory` | In-memory database provider used for isolated service tests |
-| `Microsoft.EntityFrameworkCore.Sqlite` | Relational database provider used for database constraint tests |
-| `Swashbuckle.AspNetCore` | Swagger/OpenAPI documentation generation |
-| `Swashbuckle.AspNetCore.SwaggerUI` | Interactive Swagger UI for testing API endpoints |
-
-All package references are managed through the project `.csproj` files and are automatically restored using:
-
-```bash
-dotnet restore
-```
+- **User** – represents a user of the booking system.
+- **Role** – defines the user's role and authorization level.
+- **Resource** – represents a resource that can be booked.
+- **Booking** – connects a user with a resource for a specified time period.
 
 ## ER Diagram
 
@@ -267,303 +141,408 @@ Self-registered users are always assigned the `User` role.
 - `PUT /api/resources/{id}`
 - `DELETE /api/resources/{id}`
 
-## Booking Business Rules & Validation
+## Authentication and Authorization
 
-The API enforces a set of validation rules to ensure data integrity and prevent invalid or conflicting bookings.
+The API uses JWT Bearer authentication.
 
-### Business Rules
+Users authenticate through:
 
-The following rules apply:
+```http
+POST /api/auth/login
+```
 
-1. **Valid Time Range**
-   - `StartTime` must be earlier than `EndTime`
-   - Returns `400 Bad Request` if invalid
-   - Also enforced by the database through the `CK_Bookings_EndTime_After_StartTime` check constraint
+A successful login returns a JWT token.
 
-2. **Valid StartTime Range**
-   - `StartTime` must be in the future
-   - Returns `400 Bad Request` if invalid
+The token can then be supplied through Swagger using the **Authorize** button.
 
-3. **Role Must Exist**
-   - The provided `RoleId` must exist in the system
-   - Returns `404 Not Found` if role does not exist
+Protected endpoints use role-based authorization where appropriate.
 
-4. **User Must Exist**
-   - The provided `UserId` must exist in the system
-   - Returns `404 Not Found` if user does not exist
+## Running the Project with Docker
 
-5. **User `Email` Must be Unique**
-   - Email addresses are trimmed and normalized before comparison
-   - Email uniqueness is case-insensitive
-   - A unique database index on `NormalizedEmail` provides database-level enforcement
-   - Returns `409 Conflict` if the provided email is already in use
+Docker is the recommended way to run the complete application locally.
 
-6. **Resource Must Exist**
-   - The provided `ResourceId` must exist in the system
-   - Returns `404 Not Found` if resource does not exist
+Docker Compose starts both:
 
-7. **Booking Must Exist**
-   - The provided `BookingId` must exist in the system
-   - Returns `404 Not Found` if booking does not exist
+1. the ASP.NET Core API
+2. Microsoft SQL Server
 
-9. **The requested user to be deleted has no bookings**
-   - The provided `UserId` to be deleted must not have any bookings
-   - Returns `409 Conflict` if bookings are detected
-   - The database relationship also uses restricted delete behavior
+This means that you do **not** need to install SQL Server locally.
 
-10. **The requested resource to be deleted has no bookings**
-    - The provided `ResourceId` to be deleted must not have any bookings
-    - Returns `409 Conflict` if bookings are detected
-    - The database relationship also uses restricted delete behavior
+You also do **not** need Visual Studio or the .NET SDK when running the application entirely through Docker.
 
-11. **No Overlapping Bookings**
-    - A resource cannot be double-booked within overlapping time ranges
-    - Returns `409 Conflict` if overlap is detected
+### Prerequisites
 
-12. **The requested resource to be booked must be Active**
-    - The resource must have `IsActive = true`
-    - Returns `400 Bad Request` if inactive
+You need:
 
-14. **A booking cannot be cancelled more than once**
-    - The specified `BookingId` must not already have the status `Cancelled`
-    - Returns `400 Bad Request` if the booking is already cancelled
+- Git
+- Docker with Docker Compose support
 
-15. **Completed bookings cannot be cancelled**
-    - The specified `BookingId` must not already have the status `Completed`
-    - Returns `400 Bad Request` if the booking is already completed
+Verify Docker:
 
-16. **Cancelled bookings cannot be completed**
-    - The specified `BookingId` must not already have the status `Cancelled`
-    - Returns `400 Bad Request` if the booking is already cancelled
+```bash
+docker --version
+docker compose version
+```
 
-17. **Booking cannot be completed before EndTime has passed**
-    - The specified `BookingId` can only be completed if `EndTime` is in the past
-    - Returns `400 Bad Request` if `EndTime` is not in the past
+Both commands should return version information.
 
-18. **A booking cannot be completed more than once**
-    - The specified `BookingId` must not already have the status `Completed`
-    - Returns `400 Bad Request` if the booking is already completed
+> Docker can be used from PowerShell, Command Prompt, Linux, macOS, or WSL.  
+> Ubuntu/WSL is not required.
 
-19. **Resource Capacity Must Be Positive**
-    - `Capacity` must be greater than `0`
-    - Enforced at database level through the `CK_Resources_Capacity_Positive` check constraint
+### 1. Clone the repository
 
----
+```bash
+git clone https://github.com/PauGoSi/BookingSystem.Api.git
+cd BookingSystem.Api
+```
 
-**Successful Booking**
+### 2. Create the local environment file
 
-For creating a booking (`POST /api/bookings`):
-- If validations 1., 2., 4., 6., 11., and 12. pass, the booking is created successfully
-- Returns `201 Created` with the created booking
+The repository contains an `.env.example` file with the required environment variable names.
 
-For cancelling a booking (`PATCH /api/bookings/{id}/cancel`):
-- If validations 7., 14., and 15. pass, the booking is cancelled successfully
-- Returns `204 No Content`
+Create your own `.env` file from it.
 
-For completing a booking (`PATCH /api/bookings/{id}/complete`):
-- If validations 7., 16., 17., and 18. pass, the booking is completed successfully
-- Returns `204 No Content`
+#### Windows PowerShell
 
-For updating an existing booking (`PUT /api/bookings`):
-- If validations 1., 2., 4., 6., 11., and 12. pass, the existing booking is updated successfully
-- Returns `204 No Content`
-- Note: Completed and cancelled bookings are immutable and cannot be modified.
+```powershell
+Copy-Item .env.example .env
+```
 
-For deleting an existing booking (`DELETE /api/bookings`):
-- If validation 7. passes, the existing booking is deleted successfully
-- Returns `204 No Content`
+#### Linux / macOS / WSL
 
----
+```bash
+cp .env.example .env
+```
 
-**Successful Resource**
+The resulting `.env` file should contain:
 
-For creating a resource (`POST /api/resources`):
-- If validation 19. passes, the resource is created successfully
-- Returns `201 Created` with the created resource
+```env
+MSSQL_SA_PASSWORD=ReplaceWithAStrongLocalPassword1!
+JWT_KEY=ReplaceWithALongRandomJwtSigningKeyForLocalDevelopment123!
+DEVELOPMENT_ADMIN_PASSWORD=ReplaceWithADevelopmentAdminPassword1!
+```
 
-For updating an existing resource (`PUT /api/resources`):
-- If validations 6. and 19. pass, the existing resource is updated successfully
-- Returns `204 No Content`
+Replace the example values with your own local development values.
 
-For deleting an existing resource (`DELETE /api/resources`):
-- If validations 6. and 10. pass, the existing resource is deleted successfully
-- Returns `204 No Content`
+The `.env` file is excluded from Git and **must not be committed**.
 
----
+### Important: SQL Server password and Docker volumes
 
-**Successful User**
+`MSSQL_SA_PASSWORD` is used when the SQL Server Docker volume is initialized for the first time.
 
-For creating a user (`POST /api/users`):
-- If validations 3. and 5. pass, the user is created successfully
-- Returns `201 Created` with the created user
+Once SQL Server has been initialized, its data is stored in a persistent Docker volume.
 
-For updating an existing user (`PUT /api/users`):
-- If validations 3., 4., and 5. pass, the existing user is updated successfully
-- Returns `204 No Content`
+Therefore, changing only:
 
-For deleting an existing user (`DELETE /api/users`):
-- If validations 4. and 9. pass, the existing user is deleted successfully
-- Returns `204 No Content`
+```env
+MSSQL_SA_PASSWORD=...
+```
 
----
+in `.env` after the database has already been created will **not** change the password used by the existing SQL Server instance.
 
-**System Roles**
+This may result in an error similar to:
 
-The application uses two built-in roles:
+```text
+Login failed for user 'sa'
+```
 
-- `Admin`
-- `User`
+If you need to change `MSSQL_SA_PASSWORD` after SQL Server has already been initialized, recreate the local database volume:
 
-These roles are created automatically during Development seeding if they do not already exist.
+```bash
+docker compose down -v
+docker compose up --build
+```
 
-Roles are intentionally read-only through the API. The API does not expose endpoints for creating, renaming, or deleting roles because the authorization model is designed around these two fixed system roles.
+> **Warning:** `docker compose down -v` deletes the local Docker database volume and all data stored in it. This is intended only for resetting the local development environment.
 
----
+The development admin password is separate from the SQL Server `sa` password.
 
-### Example Error Response
+### 3. Start the application
+
+Run:
+
+```bash
+docker compose up --build
+```
+
+Docker Compose will:
+
+1. build the ASP.NET Core API image
+2. start SQL Server
+3. start the API
+4. connect the API to SQL Server
+5. initialize the application database
+6. seed the required development data
+
+The first startup may take longer because Docker may need to download the required base images.
+
+When the API is ready, the logs should contain something similar to:
+
+```text
+Now listening on: http://[::]:8080
+Application started.
+```
+
+### 4. Open Swagger
+
+Open:
+
+```text
+http://localhost:8080/swagger
+```
+
+Swagger provides an interactive interface for exploring and testing the API.
+
+## Development Admin Login
+
+In the Development environment, the application seeds a local administrator account:
+
+```text
+Email: admin@bookingsystem.local
+```
+
+The password is the value configured in:
+
+```env
+DEVELOPMENT_ADMIN_PASSWORD
+```
+
+For example, if your `.env` contains:
+
+```env
+DEVELOPMENT_ADMIN_PASSWORD=MyLocalAdminPassword123!
+```
+
+use:
 
 ```json
 {
-  "error": "Resource is already booked in this time range."
+  "email": "admin@bookingsystem.local",
+  "password": "MyLocalAdminPassword123!"
 }
 ```
 
-This project follows a clean, layered architecture with clear separation of concerns.
+with:
 
-### Core Layers
+```http
+POST /api/auth/login
+```
 
-- **Controllers**
-  Handle HTTP requests and responses.
-  Responsible for routing, model binding, and returning appropriate HTTP status codes.
+A successful request returns a JWT token.
 
-- **Services**
-  Contain business logic and validation rules.
-  Keep controllers thin and logic reusable and testable.
+### Using the JWT token in Swagger
 
-- **DTOs (Data Transfer Objects)**
-  Define API input/output models.
-  Prevent direct exposure of domain entities.
+1. Call `POST /api/auth/login`.
+2. Copy the returned JWT token.
+3. Click **Authorize** at the top of Swagger.
+4. Enter the token as required by the Swagger authorization dialog.
+5. Click **Authorize**.
+6. You can now call protected endpoints.
 
-- **Data (DbContext)**
-  Handles database access and relational configuration using Entity Framework Core.
+## Stopping the Application
 
-### Supporting Layers
+Press:
 
-- **Enums**
-  Strongly-typed domain values (e.g. `BookingStatus`).
-  Improve readability and prevent invalid states.
+```text
+Ctrl+C
+```
 
-- **Middleware**
-  Handles cross-cutting concerns such as global error handling.
-  Ensures consistent API responses.
+in the terminal running Docker Compose.
 
-- **BackgroundServices**
-  Executes background processes independently of HTTP requests.
-  Example: Automatically marks expired bookings as `Completed`.
+Then run:
 
-- **Seed (DbSeeder)**
-  Seeds initial data such as roles and a development admin user.
-  Ensures the system is usable immediately after setup.
+```bash
+docker compose down
+```
 
-- **Migrations**
-  Version database schema changes using Entity Framework Core migrations.
-  Includes database constraints, indexes, and relationship configuration.
+This removes the containers and Docker network but preserves the SQL Server data volume.
 
-### Design Principles
+The next:
 
-- Separation of concerns
-- Thin controllers
-- Centralized business logic
-- Defense in depth through service-level validation and database constraints
-- Secure-by-default API design
-- Scalable and maintainable structure
+```bash
+docker compose up
+```
 
-## Time Handling
+will therefore reuse the existing local database.
 
-All timestamps are stored and processed in **UTC** (`DateTime.UtcNow`).
+To remove the database as well:
 
-- Avoids issues with time zones and daylight saving time
-- Ensures consistent behavior across environments
-- Clients are responsible for converting to local time
+```bash
+docker compose down -v
+```
 
-## Authentication & Authorization
+Again, this permanently deletes the local Docker database data.
 
-This API uses **JWT (JSON Web Token)** authentication with **role-based access control (RBAC)**.
+## Building Only the API Docker Image
 
-All protected endpoints require a valid JWT access token.
+The API image can also be built independently of Docker Compose.
 
-## Authorization (RBAC)
+From the repository root:
 
-Access is controlled using user roles and ownership-based authorization rules.
+```bash
+docker build -f ./BookingSystem.Api/Dockerfile -t bookingsystem-api .
+```
 
-| Role | Permissions |
-|---|---|
-| Admin | Full access to all resources and bookings |
-| User | Limited access to own bookings and profile |
+Verify the image:
 
-## Booking Authorization Rules
+```bash
+docker images
+```
 
-### User Permissions
+You should see an image named:
 
-Authenticated users can:
+```text
+bookingsystem-api
+```
 
-- Create bookings
-- View their own bookings
-- Cancel their own active bookings
+Docker Compose is recommended when running the complete application because the API depends on SQL Server.
 
-Authenticated users cannot:
+## Running Without Docker
 
-- Access other users' bookings
-- Cancel other users' bookings
-- Manually complete bookings
+The project can also be run directly with the .NET SDK.
 
-### Admin Permissions
+For this approach you need:
 
-Admins can:
+- .NET 10 SDK
+- access to a SQL Server instance
+- appropriate local configuration/secrets
 
-- Access all bookings
-- Cancel any booking
-- Manually complete bookings
-- Manage users, roles, and resources
+From the API project directory:
 
-## Booking Business Rules
+```bash
+cd BookingSystem.Api
+dotnet restore
+dotnet build
+dotnet run
+```
 
-The API enforces several business rules for booking lifecycle management:
+For most reviewers, the Docker Compose setup is the simplest way to run the complete application.
 
-- Users can only access and manage their own bookings
-- Admins can access and manage all bookings
-- Completed bookings cannot be cancelled
-- Cancelled bookings cannot be completed
-- Bookings cannot be completed before `EndTime` has passed
-- Only admins can manually complete bookings
-- Booking conflicts are prevented for overlapping time periods
+## Tests
 
-## Resource Authorization
+The solution contains automated tests using xUnit.
 
-### Read Access
+Run all tests from the repository root:
 
-- All authenticated users can view resources
+```bash
+dotnet test
+```
 
-### Write Access
+The tests cover selected service-layer behavior and validation rules.
 
-Only admins can:
+## Continuous Integration
 
-- Create resources
-- Update resources
-- Delete resources
+The repository contains a GitHub Actions workflow:
 
-## User & Role Management
+```text
+.github/workflows/ci.yml
+```
 
-User management endpoints are restricted to admins only.
+The CI pipeline automatically restores dependencies, builds the solution, and runs the automated tests.
 
-The authorization model uses two fixed system roles, `Admin` and `User`. Roles can be viewed by admins but cannot be created, renamed, or deleted through the API.
+This helps ensure that committed changes continue to compile and pass the test suite.
+
+## Booking Rules
+
+The booking domain includes validation such as:
+
+- a booking cannot be created in the past
+- the end time must be later than the start time
+- bookings are associated with an existing user and resource
+- booking status is handled by the application
+- completed bookings can be updated automatically by a background service
+
+## Pagination and Filtering
+
+Booking queries support pagination and filtering.
+
+Examples include filtering by:
+
+- Resource ID
+- User ID
+- From date
+- To date
+
+Pagination is controlled through page and page-size parameters.
+
+## Error Handling
+
+The API contains centralized error handling through middleware.
+
+This keeps exception handling out of individual controllers and provides a consistent approach to API errors.
 
 ## Security
 
-Authorization, validation, and data integrity rules are enforced at multiple layers:
+Sensitive configuration values are not intended to be committed to source control.
 
-- At controller level using `[Authorize]` attributes
-- Within the service layer using business-rule validation
-- At database level using unique indexes, check constraints, foreign keys, and restricted delete behavior
+Local Docker secrets are stored in:
 
-This defense-in-depth approach protects critical data integrity rules even if data is written through a path other than the normal API service flow.
+```text
+.env
+```
+
+and the file is excluded through `.gitignore`.
+
+Only:
+
+```text
+.env.example
+```
+
+is committed, containing example/placeholder values.
+
+JWT signing keys, SQL Server passwords, and development administrator passwords should always be replaced with appropriate local values.
+
+## Quick Start
+
+For a reviewer who already has Git and Docker installed:
+
+### PowerShell
+
+```powershell
+git clone https://github.com/PauGoSi/BookingSystem.Api.git
+cd BookingSystem.Api
+Copy-Item .env.example .env
+# Edit .env and replace the example secrets
+docker compose up --build
+```
+
+### Linux / macOS / WSL
+
+```bash
+git clone https://github.com/PauGoSi/BookingSystem.Api.git
+cd BookingSystem.Api
+cp .env.example .env
+# Edit .env and replace the example secrets
+docker compose up --build
+```
+
+Then open:
+
+```text
+http://localhost:8080/swagger
+```
+
+Login with:
+
+```text
+admin@bookingsystem.local
+```
+
+and the password configured as `DEVELOPMENT_ADMIN_PASSWORD` in `.env`.
+
+## Purpose
+
+This project was created as a portfolio project to demonstrate practical backend development with ASP.NET Core, including:
+
+- REST API design
+- layered application structure
+- Entity Framework Core
+- relational database integration
+- authentication and authorization
+- validation and error handling
+- automated testing
+- background processing
+- CI
+- containerization
+- reproducible local development with Docker Compose
