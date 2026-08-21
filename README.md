@@ -2,20 +2,18 @@
 
 A RESTful booking system built with ASP.NET Core Web API.
 
-The project demonstrates a production-oriented backend architecture with authentication, authorization, validation, Entity Framework Core, automated tests, CI, and Docker-based local development.
+This portfolio project demonstrates a production-oriented backend architecture with authentication, authorization, validation, Entity Framework Core, automated tests, continuous integration, and reproducible local development with Docker Compose.
 
 ## Features
 
 - ASP.NET Core Web API
-- Entity Framework Core
-- SQL Server
-- JWT authentication
-- Role-based authorization
-- CRUD operations for users, roles, resources, and bookings
-- Booking validation and conflict handling
+- Entity Framework Core with SQL Server
+- JWT authentication and role-based authorization
+- CRUD operations for users, resources, and bookings
+- Booking validation and conflict detection
 - Pagination and filtering
 - Global exception handling
-- Automatic booking completion using a background service
+- Automatic booking completion through a background service
 - Swagger / OpenAPI documentation
 - xUnit tests
 - GitHub Actions CI
@@ -31,8 +29,7 @@ The project demonstrates a production-oriented backend architecture with authent
 - JWT Bearer Authentication
 - Swagger / OpenAPI
 - xUnit
-- Docker
-- Docker Compose
+- Docker and Docker Compose
 - GitHub Actions
 
 ## Project Structure
@@ -70,124 +67,140 @@ compose.yaml
 .gitignore
 ```
 
-## Main Entities
+## Domain Model
 
-The application contains four main domain entities:
+The application contains four main entities:
 
 - **User** – represents a user of the booking system.
-- **Role** – defines the user's role and authorization level.
+- **Role** – defines a user's permissions.
 - **Resource** – represents a resource that can be booked.
-- **Booking** – connects a user with a resource for a specified time period.
+- **Booking** – connects a user to a resource for a specified period.
+
+Relationships:
+
+- A **User** has one **Role**.
+- A **Booking** belongs to one **User**.
+- A **Booking** uses one **Resource**.
 
 ## ER Diagram
 
 ![ER Diagram](docs/er-diagram.png)
 
-## Data Model
-
-- A **User** has one **Role**
-- A **Booking** belongs to one **User**
-- A **Booking** uses one **Resource**
-
 ## API Endpoints
+
+### Authentication
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+
+Self-registered users are always assigned the `User` role.
 
 ### Bookings
 
 - `GET /api/bookings`
+- `GET /api/bookings/{id}`
+- `POST /api/bookings`
+- `PUT /api/bookings/{id}`
+- `PATCH /api/bookings/{id}/cancel`
+- `PATCH /api/bookings/{id}/complete`
+- `DELETE /api/bookings/{id}`
+
+Booking queries support pagination and filtering:
+
 - `GET /api/bookings?page=1&pageSize=10`
 - `GET /api/bookings?resourceId=1`
-- `GET /api/bookings?userId=1`
 - `GET /api/bookings?fromDate=2026-05-01&toDate=2026-05-31`
-
-`BookingStatus` API endpoint URL supports string representations of enum values.
-
 - `GET /api/bookings?status=Active`
 - `GET /api/bookings?status=Cancelled`
 - `GET /api/bookings?status=Completed`
 
-Using string values (e.g. `Completed`) is recommended for better readability and maintainability.
+String values such as `Active`, `Cancelled`, and `Completed` are recommended when filtering by booking status.
 
-- `POST /api/bookings`
-- `PATCH /api/bookings/{id}/cancel`
-- `PATCH /api/bookings/{id}/complete`
-- `GET /api/bookings/{id}`
-- `PUT /api/bookings/{id}`
-- `DELETE /api/bookings/{id}`
+Authenticated users can access only their own bookings. Administrators can access all bookings.
 
 ### Users
 
 - `GET /api/users`
-- `POST /api/users`
 - `GET /api/users/{id}`
+- `POST /api/users`
 - `PUT /api/users/{id}`
 - `DELETE /api/users/{id}`
+
+User management endpoints require the `Admin` role.
+
+User creation and updates use a `role` field with the supported values `"Admin"` and `"User"`. Internal database role IDs are not exposed through these requests or responses.
 
 ### Roles
 
 - `GET /api/roles`
 - `GET /api/roles/{id}`
 
-`Admin` and `User` are built-in system roles created during Development seeding. Role creation, modification, and deletion are intentionally not supported.
+Role endpoints require the `Admin` role.
 
-User creation and updates use the `role` field with the supported values `"Admin"` and `"User"` instead of exposing database role IDs. User responses likewise expose the role name rather than the internal `RoleId`.
-
-Self-registered users are always assigned the `User` role.
+`Admin` and `User` are built-in system roles created during Development seeding. Creating, modifying, and deleting roles through the API is intentionally not supported.
 
 ### Resources
 
 - `GET /api/resources`
-- `POST /api/resources`
 - `GET /api/resources/{id}`
+- `POST /api/resources`
 - `PUT /api/resources/{id}`
 - `DELETE /api/resources/{id}`
+
+Authenticated users can read resources. Creating, updating, and deleting resources requires the `Admin` role.
 
 ## Authentication and Authorization
 
 The API uses JWT Bearer authentication.
 
-Users authenticate through:
+Authenticate through:
 
 ```http
 POST /api/auth/login
 ```
 
-A successful login returns a JWT token.
+A successful login returns a JWT token. In Swagger:
 
-The token can then be supplied through Swagger using the **Authorize** button.
+1. Call `POST /api/auth/login`.
+2. Copy the returned token.
+3. Select **Authorize**.
+4. Enter the token in the authorization dialog.
+5. Call the protected endpoints.
 
-Protected endpoints use role-based authorization where appropriate.
+## Development Admin Account
 
-## Running the Project with Docker
+When the application runs in the Development environment, it applies pending Entity Framework Core migrations and seeds the built-in roles and a local administrator account.
 
-Docker is the recommended way to run the complete application locally.
+The default admin email is:
 
-Docker Compose starts both:
+```text
+admin@bookingsystem.local
+```
 
-1. the ASP.NET Core API
-2. Microsoft SQL Server
+The source of the admin password depends on how the application is started:
 
-This means that you do **not** need to install SQL Server locally.
+| Run mode | Admin password source | How to view it |
+|---|---|---|
+| Docker Compose | `DEVELOPMENT_ADMIN_PASSWORD` in the repository-root `.env` file | Open `.env` locally |
+| Without Docker | `DevelopmentAdmin:Password` in .NET User Secrets | Run `dotnet user-secrets list` inside the `BookingSystem.Api` project directory |
 
-You also do **not** need Visual Studio or the .NET SDK when running the application entirely through Docker.
+The `.env` file and .NET User Secrets are separate configuration stores. A value set in one is not automatically available in the other.
+
+## Option 1: Run with Docker Compose
+
+Docker Compose starts both the API and SQL Server. You do not need a local SQL Server installation, Visual Studio, or the .NET SDK for this option.
 
 ### Prerequisites
-
-You need:
 
 - Git
 - Docker with Docker Compose support
 
-Verify Docker:
+Verify the installation:
 
 ```bash
 docker --version
 docker compose version
 ```
-
-Both commands should return version information.
-
-> Docker can be used from PowerShell, Command Prompt, Linux, macOS, or WSL.  
-> Ubuntu/WSL is not required.
 
 ### 1. Clone the repository
 
@@ -196,25 +209,23 @@ git clone https://github.com/PauGoSi/BookingSystem.Api.git
 cd BookingSystem.Api
 ```
 
-### 2. Create the local environment file
+### 2. Create and configure `.env`
 
-The repository contains an `.env.example` file with the required environment variable names.
+Create a local `.env` file from `.env.example`.
 
-Create your own `.env` file from it.
-
-#### Windows PowerShell
+Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-#### Linux / macOS / WSL
+Linux, macOS, or WSL:
 
 ```bash
 cp .env.example .env
 ```
 
-The resulting `.env` file should contain:
+Replace every example value in `.env`:
 
 ```env
 MSSQL_SA_PASSWORD=ReplaceWithAStrongLocalPassword1!
@@ -222,160 +233,67 @@ JWT_KEY=ReplaceWithALongRandomJwtSigningKeyForLocalDevelopment123!
 DEVELOPMENT_ADMIN_PASSWORD=ReplaceWithADevelopmentAdminPassword1!
 ```
 
-Replace the example values with your own local development values.
+The values have different purposes:
 
-The `.env` file is excluded from Git and **must not be committed**.
+- `MSSQL_SA_PASSWORD` authenticates the API with the Dockerized SQL Server.
+- `JWT_KEY` signs and validates JWT access tokens.
+- `DEVELOPMENT_ADMIN_PASSWORD` is the password used to log in as `admin@bookingsystem.local`.
 
-### Important: SQL Server password and Docker volumes
-
-`MSSQL_SA_PASSWORD` is used when the SQL Server Docker volume is initialized for the first time.
-
-Once SQL Server has been initialized, its data is stored in a persistent Docker volume.
-
-Therefore, changing only:
-
-```env
-MSSQL_SA_PASSWORD=...
-```
-
-in `.env` after the database has already been created will **not** change the password used by the existing SQL Server instance.
-
-This may result in an error similar to:
-
-```text
-Login failed for user 'sa'
-```
-
-If you need to change `MSSQL_SA_PASSWORD` after SQL Server has already been initialized, recreate the local database volume:
-
-```bash
-docker compose down -v
-docker compose up --build
-```
-
-> **Warning:** `docker compose down -v` deletes the local Docker database volume and all data stored in it. This is intended only for resetting the local development environment.
-
-The development admin password is separate from the SQL Server `sa` password.
+The `.env` file is excluded from Git and must never be committed.
 
 ### 3. Start the application
 
-Run:
-
 ```bash
 docker compose up --build
 ```
 
-Docker Compose will:
+Docker Compose builds the API, starts SQL Server, waits for the database health check, applies migrations, and seeds the Development data.
 
-1. build the ASP.NET Core API image
-2. start SQL Server
-3. start the API
-4. connect the API to SQL Server
-5. initialize the application database
-6. seed the required development data
-
-The first startup may take longer because Docker may need to download the required base images.
-
-When the API is ready, the logs should contain something similar to:
-
-```text
-Now listening on: http://[::]:8080
-Application started.
-```
-
-### 4. Open Swagger
-
-Open:
+Open Swagger at:
 
 ```text
 http://localhost:8080/swagger
 ```
 
-Swagger provides an interactive interface for exploring and testing the API.
-
-## Development Admin Login
-
-In the Development environment, the application seeds a local administrator account:
-
-```text
-Email: admin@bookingsystem.local
-```
-
-The password is the value configured in:
-
-```env
-DEVELOPMENT_ADMIN_PASSWORD
-```
-
-For example, if your `.env` contains:
-
-```env
-DEVELOPMENT_ADMIN_PASSWORD=MyLocalAdminPassword123!
-```
-
-use:
+Log in through `POST /api/auth/login` with:
 
 ```json
 {
   "email": "admin@bookingsystem.local",
-  "password": "MyLocalAdminPassword123!"
+  "password": "the value of DEVELOPMENT_ADMIN_PASSWORD in .env"
 }
 ```
 
-with:
+### 4. Stop the application
 
-```http
-POST /api/auth/login
-```
-
-A successful request returns a JWT token.
-
-### Using the JWT token in Swagger
-
-1. Call `POST /api/auth/login`.
-2. Copy the returned JWT token.
-3. Click **Authorize** at the top of Swagger.
-4. Enter the token as required by the Swagger authorization dialog.
-5. Click **Authorize**.
-6. You can now call protected endpoints.
-
-## Stopping the Application
-
-Press:
-
-```text
-Ctrl+C
-```
-
-in the terminal running Docker Compose.
-
-Then run:
+Press `Ctrl+C`, then run:
 
 ```bash
 docker compose down
 ```
 
-This removes the containers and Docker network but preserves the SQL Server data volume.
+This removes the containers and network but preserves the SQL Server data volume.
 
-The next:
-
-```bash
-docker compose up
-```
-
-will therefore reuse the existing local database.
-
-To remove the database as well:
+To remove the database volume and all local data as well:
 
 ```bash
 docker compose down -v
 ```
 
-Again, this permanently deletes the local Docker database data.
+> **Warning:** `docker compose down -v` permanently deletes the local Docker database data.
 
-## Building Only the API Docker Image
+### SQL Server password and persistent volumes
 
-The API image can also be built independently of Docker Compose.
+`MSSQL_SA_PASSWORD` is applied when the SQL Server volume is initialized. Changing this value in `.env` does not update the password of an existing database volume.
+
+If the password must be changed after initialization, recreate the local volume:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+### Build only the API image
 
 From the repository root:
 
@@ -383,244 +301,79 @@ From the repository root:
 docker build -f ./BookingSystem.Api/Dockerfile -t bookingsystem-api .
 ```
 
-Verify the image:
+The complete application still requires access to SQL Server, so Docker Compose is recommended for normal local use.
 
-```bash
-docker images
-```
+## Option 2: Run without Docker
 
-You should see an image named:
+Use this option to run the application directly with the .NET SDK and SQL Server or SQL Server LocalDB.
 
-```text
-bookingsystem-api
-```
-
-Docker Compose is recommended when running the complete application because the API depends on SQL Server.
-
-## Running Without Docker
-
-The project can also be run directly with the .NET SDK.
-
-For this approach you need:
-
-- .NET 10 SDK
-- access to a SQL Server instance
-- appropriate local configuration/secrets
-
-From the API project directory:
-
-```bash
-cd BookingSystem.Api
-dotnet restore
-dotnet build
-dotnet run
-```
-
-For most reviewers, the Docker Compose setup is the simplest way to run the complete application.
-
-## Tests
-
-The solution contains automated tests using xUnit.
-
-Run all tests from the repository root:
-
-```bash
-dotnet test
-```
-
-The tests cover selected service-layer behavior and validation rules.
-
-## Continuous Integration
-
-The repository contains a GitHub Actions workflow:
-
-```text
-.github/workflows/ci.yml
-```
-
-The CI pipeline automatically restores dependencies, builds the solution, and runs the automated tests.
-
-This helps ensure that committed changes continue to compile and pass the test suite.
-
-## Booking Rules
-
-The booking domain includes validation such as:
-
-- a booking cannot be created in the past
-- the end time must be later than the start time
-- bookings are associated with an existing user and resource
-- booking status is handled by the application
-- completed bookings can be updated automatically by a background service
-
-## Pagination and Filtering
-
-Booking queries support pagination and filtering.
-
-Examples include filtering by:
-
-- Resource ID
-- User ID
-- From date
-- To date
-
-Pagination is controlled through page and page-size parameters.
-
-## Error Handling
-
-The API contains centralized error handling through middleware.
-
-This keeps exception handling out of individual controllers and provides a consistent approach to API errors.
-
-## Security
-
-Sensitive configuration values are not intended to be committed to source control.
-
-Local Docker secrets are stored in:
-
-```text
-.env
-```
-
-and the file is excluded through `.gitignore`.
-
-Only:
-
-```text
-.env.example
-```
-
-is committed, containing example/placeholder values.
-
-JWT signing keys, SQL Server passwords, and development administrator passwords should always be replaced with appropriate local values.
-
-## Quick Start
-
-For a reviewer who already has Git and Docker installed:
-
-### PowerShell
-
-```powershell
-git clone https://github.com/PauGoSi/BookingSystem.Api.git
-cd BookingSystem.Api
-Copy-Item .env.example .env
-# Edit .env and replace the example secrets
-docker compose up --build
-```
-
-### Linux / macOS / WSL
-
-```bash
-git clone https://github.com/PauGoSi/BookingSystem.Api.git
-cd BookingSystem.Api
-cp .env.example .env
-# Edit .env and replace the example secrets
-docker compose up --build
-```
-
-Then open:
-
-```text
-http://localhost:8080/swagger
-```
-
-Login with:
-
-```text
-admin@bookingsystem.local
-```
-
-and the password configured as `DEVELOPMENT_ADMIN_PASSWORD` in `.env`.
-
-## Quick Start Without Docker
-
-If you prefer to run the application directly without Docker, you need:
+### Prerequisites
 
 - .NET 10 SDK
 - SQL Server or SQL Server LocalDB
-- Git (optional if the repository is downloaded as a ZIP)
+- Git, unless the repository was downloaded as a ZIP file
 
-Visual Studio is not required.
-
-### 1. Get the source code
-
-Using Git:
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/PauGoSi/BookingSystem.Api.git
 cd BookingSystem.Api
 ```
 
-Alternatively, download the repository as a ZIP from GitHub and extract it locally.
+### 2. Configure .NET User Secrets
 
-### 2. Configure local development secrets
-
-Navigate to the ASP.NET Core API project:
-
-#### Windows PowerShell
-
-```powershell
-cd .\BookingSystem.Api\
-```
-
-#### Linux / macOS
+Move into the API project directory:
 
 ```bash
-cd ./BookingSystem.Api/
+cd BookingSystem.Api
 ```
 
-Configure a JWT signing key:
+Configure a JWT signing key and the Development admin password:
 
 ```bash
 dotnet user-secrets set "Jwt:Key" "YOUR_LONG_RANDOM_JWT_SIGNING_KEY"
-```
-
-Configure the Development admin password:
-
-```bash
 dotnet user-secrets set "DevelopmentAdmin:Password" "YOUR_DEVELOPMENT_ADMIN_PASSWORD"
 ```
 
-You can optionally override the default admin email:
+Optionally override the default admin email:
 
 ```bash
 dotnet user-secrets set "DevelopmentAdmin:Email" "YOUR_ADMIN_EMAIL"
 ```
 
-Verify the configured secrets:
+Display the configured values at any time by running the following command from the same `BookingSystem.Api` project directory:
 
 ```bash
 dotnet user-secrets list
 ```
 
-.NET User Secrets are stored only on the local machine and are not committed to the repository.
+The login password is the value shown next to:
+
+```text
+DevelopmentAdmin:Password
+```
+
+Do not look for this password in `.env` when running without Docker. The `.env` file is used by Docker Compose, whereas direct .NET execution reads the Development password from .NET User Secrets.
+
+.NET User Secrets are stored outside the repository on the local machine and are not committed to Git.
 
 ### 3. Configure SQL Server
 
-By default, the application uses SQL Server LocalDB:
+The default connection string uses SQL Server LocalDB:
 
 ```text
 Server=(localdb)\MSSQLLocalDB;Database=BookingDb;Trusted_Connection=True;TrustServerCertificate=True;
 ```
 
-If SQL Server LocalDB is available, no connection string change is required.
-
-If you use another SQL Server instance, configure the connection string as a local User Secret:
+No change is required when SQL Server LocalDB is available. To use another SQL Server instance, store its connection string in .NET User Secrets:
 
 ```bash
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "YOUR_SQL_SERVER_CONNECTION_STRING"
 ```
 
-### 4. Restore dependencies
+### 4. Restore, build, and run
 
 Return to the repository root:
-
-#### Windows PowerShell
-
-```powershell
-cd ..
-```
-
-#### Linux / macOS
 
 ```bash
 cd ..
@@ -630,61 +383,96 @@ Then run:
 
 ```bash
 dotnet restore
-```
-
-### 5. Run the application
-
-```bash
+dotnet build
 dotnet run --project BookingSystem.Api
 ```
 
-When running in the Development environment, the application automatically:
-
-- applies pending Entity Framework Core migrations
-- creates the built-in `Admin` and `User` roles if missing
-- creates the Development admin user if missing
-
-Swagger is available at the local URL shown in the terminal, typically:
+Swagger is available at the URL shown in the terminal, typically:
 
 ```text
 https://localhost:7223/swagger
 ```
 
-The exact port may vary depending on the local development configuration.
+### 5. Log in
 
-### 6. Log in
+From the API project directory, display the locally configured password if necessary:
 
-Use:
-
-```text
-POST /api/auth/login
+```bash
+dotnet user-secrets list
 ```
 
-with:
+Use the value of `DevelopmentAdmin:Password` with `POST /api/auth/login`:
 
 ```json
 {
   "email": "admin@bookingsystem.local",
-  "password": "YOUR_DEVELOPMENT_ADMIN_PASSWORD"
+  "password": "the value of DevelopmentAdmin:Password in .NET User Secrets"
 }
 ```
 
 If `DevelopmentAdmin:Email` was overridden, use that email instead.
 
-A successful login returns a JWT token that can be used with protected API endpoints.
+## Booking Rules
+
+The application enforces the following rules:
+
+- A booking must start in the future.
+- The end time must be later than the start time.
+- The selected user and resource must exist.
+- The selected resource must be active.
+- Active bookings for the same resource cannot overlap.
+- Cancelled and completed bookings cannot be modified.
+- A background service automatically marks expired active bookings as completed.
+
+## Pagination and Filtering
+
+`GET /api/bookings` supports:
+
+- pagination through `page` and `pageSize`
+- filtering by resource ID
+- filtering by start and end date
+- filtering by booking status
+
+`pageSize` accepts values from 1 through 100.
+
+## Error Handling
+
+Centralized middleware logs unexpected exceptions and returns a consistent `500 Internal Server Error` response without exposing internal exception details.
+
+## Security
+
+- Passwords are stored as hashes using ASP.NET Core's password hasher.
+- JWT signing keys and Development admin passwords are kept outside committed configuration files.
+- `.env` is excluded from Git and is used only by Docker Compose.
+- .NET User Secrets are used for sensitive local configuration when the API runs directly with the .NET SDK.
+- Authorization restricts protected operations by user identity and role.
+- Database relationships use restrictive delete behavior to protect referenced data.
+
+## Tests
+
+The solution contains xUnit tests for service-layer behavior, authorization rules, authentication, booking validation, and database constraints.
+
+Run all tests from the repository root:
+
+```bash
+dotnet test
+```
+
+## Continuous Integration
+
+The GitHub Actions workflow in `.github/workflows/ci.yml` automatically restores dependencies, builds the solution in Release configuration, and runs the test suite for pushes and pull requests.
 
 ## Purpose
 
-This project was created as a portfolio project to demonstrate practical backend development with ASP.NET Core, including:
+This portfolio project demonstrates practical backend development with ASP.NET Core, including:
 
 - REST API design
 - layered application structure
-- Entity Framework Core
-- relational database integration
+- Entity Framework Core and relational database integration
 - authentication and authorization
 - validation and error handling
 - automated testing
 - background processing
-- CI
+- continuous integration
 - containerization
-- reproducible local development with Docker Compose
+- reproducible local development
