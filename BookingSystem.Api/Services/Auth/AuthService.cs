@@ -105,7 +105,6 @@ namespace BookingSystem.Api.Services.Auth
                 return (false, "Invalid email or password.", 401, null);
             }
 
-            // JWT token generation will be added in the next step
             var token = GenerateJwtToken(user);
 
             return (true, null, 200, token);
