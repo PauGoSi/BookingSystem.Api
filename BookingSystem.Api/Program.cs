@@ -11,7 +11,7 @@ using BookingSystem.Api.Services.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using BookingSystem.Api.Data.Seed;
 
 namespace BookingSystem.Api
@@ -74,19 +74,9 @@ namespace BookingSystem.Api
                     Description = "Enter your JWT token below."
                 });
 
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
                 {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        Array.Empty<string>()
-                    }
+                    [new OpenApiSecuritySchemeReference("Bearer", document)] = []
                 });
             });
 

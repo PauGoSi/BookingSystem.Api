@@ -767,7 +767,7 @@ namespace BookingSystem.Api.Tests
         }
 
         [Fact]
-        public async Task CompleteBookingAsync_ShouldReturn200_WhenAdminCompletesAnotherUsersBooking()
+        public async Task CompleteBookingAsync_ShouldReturn204_WhenAdminCompletesAnotherUsersBooking()
         {
             // Arrange
             using var context = CreateDbContext();
